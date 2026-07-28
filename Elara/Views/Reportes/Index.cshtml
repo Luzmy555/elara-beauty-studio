@@ -1,0 +1,126 @@
+@model ReporteKpiViewModel
+@{
+    ViewData["Title"] = "Reportes";
+    var hoy = DateTime.Today;
+    var desdeDefault = new DateTime(hoy.Year, hoy.Month, 1).AddMonths(-5);
+}
+
+<div class="mb-4">
+    <h1 class="h3 mb-1">Reportes</h1>
+    <p class="text-elara-muted mb-0">Panorama general del salón.</p>
+</div>
+
+<div class="row g-4 mb-4 stagger-fade-in">
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="card card-elara h-100">
+            <div class="card-body">
+                <i class="bi bi-cash-coin fs-2 text-elara-accent"></i>
+                <h5 class="card-title mt-3 mb-1">Ingresos del mes</h5>
+                <p class="fs-4 text-elara-accent mb-0">$@Model.IngresosDelMes.ToString("0.00")</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="card card-elara h-100">
+            <div class="card-body">
+                <i class="bi bi-calendar2-check fs-2 text-elara-accent"></i>
+                <h5 class="card-title mt-3 mb-1">Citas de hoy</h5>
+                <p class="fs-4 text-elara-accent mb-0">@Model.CitasDeHoy</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="card card-elara h-100">
+            <div class="card-body">
+                <i class="bi bi-people fs-2 text-elara-accent"></i>
+                <h5 class="card-title mt-3 mb-1">Clientes activos</h5>
+                <p class="fs-4 text-elara-accent mb-0">@Model.ClientesActivos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="card card-elara h-100 @(Model.ProductosPorReabastecer > 0 ? "border-elara-danger" : "")">
+            <div class="card-body">
+                <i class="bi bi-boxes fs-2 @(Model.ProductosPorReabastecer > 0 ? "text-elara-danger" : "text-elara-accent")"></i>
+                <h5 class="card-title mt-3 mb-1">Por reabastecer</h5>
+                <p class="fs-4 mb-0 @(Model.ProductosPorReabastecer > 0 ? "text-elara-danger" : "text-elara-accent")">
+                    @Model.ProductosPorReabastecer
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card card-elara mb-4">
+    <div class="card-body">
+        <form id="filtroFechasForm" class="row g-2 align-items-end">
+            <div class="col-auto">
+                <label class="form-label small mb-0">Desde</label>
+                <input type="date" id="filtroDesde" class="form-control" value="@desdeDefault.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-auto">
+                <label class="form-label small mb-0">Hasta</label>
+                <input type="date" id="filtroHasta" class="form-control" value="@hoy.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-elara">
+                    <i class="bi bi-funnel me-1"></i> Aplicar filtro
+                </button>
+            </div>
+            <div class="col-auto">
+                <a id="btnExportarExcel" href="#" class="btn btn-outline-elara">
+                    <i class="bi bi-file-earmark-excel me-1"></i> Exportar ingresos a Excel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-4 stagger-fade-in">
+    <div class="col-12 col-lg-7">
+        <div class="card card-elara h-100">
+            <div class="card-body">
+                <h5 class="card-title font-heading mb-3">Ingresos por mes</h5>
+                <canvas id="chartIngresos" height="260"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-5">
+        <div class="card card-elara h-100">
+            <div class="card-body">
+                <h5 class="card-title font-heading mb-3">Servicios más solicitados</h5>
+                <canvas id="chartServicios" height="260"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-7">
+        <div class="card card-elara h-100">
+            <div class="card-body">
+                <h5 class="card-title font-heading mb-3">Ranking de especialistas (citas completadas)</h5>
+                <canvas id="chartRanking" height="260"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-5">
+        <div class="card card-elara h-100">
+            <div class="card-body">
+                <h5 class="card-title font-heading mb-3">Clientes nuevos por mes</h5>
+                <canvas id="chartClientes" height="260"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script>
+        window.elaraReportesConfig = {
+            ingresosUrl: '@Url.Action("IngresosPorMes", "Reportes")',
+            serviciosUrl: '@Url.Action("ServiciosMasSolicitados", "Reportes")',
+            rankingUrl: '@Url.Action("RankingEmpleados", "Reportes")',
+            clientesUrl: '@Url.Action("ClientesNuevosPorMes", "Reportes")',
+            exportarUrl: '@Url.Action("ExportarIngresosExcel", "Reportes")'
+        };
+    </script>
+    <script src="~/js/reportes.js" asp-append-version="true"></script>
+}

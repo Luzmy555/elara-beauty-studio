@@ -1,0 +1,801 @@
+/* ==========================================================================
+   ELARA — Hoja de estilos de marca
+   Sistema de gestión para salón de uñas de lujo
+   ==========================================================================
+
+   PALETA DE COLORES OFICIAL (documentada aquí para reutilizar en TODOS
+   los módulos del sistema — clientes, citas, servicios, reportes, etc.)
+
+   --elara-gold           #C9A15A  Dorado principal   -> marca, acentos, bordes activos
+   --elara-gold-soft      #E4C688  Dorado suave        -> hover, detalles, focus
+   --elara-blush          #F3E5DC  Rosa nude/champagne -> fondos cálidos secundarios
+   --elara-ivory          #FDFBF9  Blanco marfil       -> fondo base de la app
+   --elara-charcoal       #2B2620  Negro carbón        -> texto principal
+   --elara-warm-gray      #8A7F73  Gris cálido         -> texto secundario / placeholders
+   --elara-sage           #A8B79A  Verde salvia        -> éxito / confirmado
+   --elara-terracotta     #C77B6C  Rojo terracota      -> alerta / cancelado (NUNCA rojo puro)
+
+   TIPOGRAFÍA
+   --font-heading  "Playfair Display"  -> títulos, logo (serif, lujo)
+   --font-body     "Poppins"           -> cuerpo de texto (sans-serif, legible)
+
+   Las fuentes se cargan vía Google Fonts en _Layout.cshtml (<link> con
+   preconnect) para no bloquear el render con @import dentro del CSS.
+   ========================================================================== */
+
+:root {
+  /* Paleta de marca */
+  --elara-gold: #C9A15A;
+  --elara-gold-soft: #E4C688;
+  --elara-blush: #F3E5DC;
+  --elara-ivory: #FDFBF9;
+  --elara-charcoal: #2B2620;
+  --elara-warm-gray: #8A7F73;
+  --elara-sage: #A8B79A;
+  --elara-terracotta: #C77B6C;
+
+  /* Alias semánticos (para no acoplar componentes a nombres de color) */
+  --elara-bg: var(--elara-ivory);
+  --elara-bg-soft: var(--elara-blush);
+  --elara-text: var(--elara-charcoal);
+  --elara-text-muted: var(--elara-warm-gray);
+  --elara-accent: var(--elara-gold);
+  --elara-accent-hover: var(--elara-gold-soft);
+  --elara-success: var(--elara-sage);
+  --elara-danger: var(--elara-terracotta);
+  --elara-card-bg: #FFFFFF;
+  --elara-input-bg: #FFFFFF;
+
+  /* Tipografía */
+  --font-heading: "Playfair Display", "Georgia", serif;
+  --font-body: "Poppins", "Segoe UI", sans-serif;
+
+  /* Geometría / "soft UI" */
+  --elara-radius-sm: 10px;
+  --elara-radius: 14px;
+  --elara-radius-lg: 16px;
+  --elara-shadow-soft: 0 10px 30px -12px rgba(43, 38, 32, 0.18);
+  --elara-shadow-hover: 0 16px 40px -14px rgba(201, 161, 90, 0.35);
+  --elara-transition: all 0.25s ease-in-out;
+
+  /* Layout del panel administrativo */
+  --elara-sidebar-width: 260px;
+  --elara-sidebar-width-collapsed: 76px;
+  --elara-navbar-height: 68px;
+}
+
+/* ==========================================================================
+   MODO OSCURO — se activa poniendo data-theme="dark" en <html> (ver
+   wwwroot/js/theme.js). Solo redefine los alias semánticos (--elara-bg,
+   --elara-text, etc.) y --elara-blush (que en el tema claro se usa como
+   color de borde/superficie suave en toda la hoja): así todos los
+   componentes que ya usan esos alias se retintan solos, sin tocar la
+   paleta de marca fija (el dorado --elara-gold se mantiene igual porque
+   contrasta bien también sobre fondo oscuro).
+   ========================================================================== */
+
+[data-theme="dark"] {
+  --elara-blush: #3A3226;
+  --elara-bg: #1A1712;
+  --elara-bg-soft: #241F19;
+  --elara-text: #F3E5DC;
+  --elara-text-muted: #B9AC9B;
+  --elara-accent: var(--elara-gold);
+  --elara-accent-hover: #D9B978;
+  --elara-success: var(--elara-sage);
+  --elara-danger: var(--elara-terracotta);
+  --elara-card-bg: #2B2620;
+  --elara-input-bg: #241F19;
+  --elara-shadow-soft: 0 10px 30px -12px rgba(0, 0, 0, 0.55);
+  --elara-shadow-hover: 0 16px 40px -14px rgba(201, 161, 90, 0.28);
+}
+
+/* Componentes de Bootstrap que no pasan por las variables de marca
+   (inputs, tablas, dropdowns, modales) + algunos casos puntuales que usan
+   colores fijos en vez de variables (badges, checks de especialidad). */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+  background-color: var(--elara-input-bg);
+  border-color: var(--elara-blush);
+  color: var(--elara-text);
+}
+
+[data-theme="dark"] .form-control::placeholder {
+  color: var(--elara-text-muted);
+  opacity: 0.8;
+}
+
+[data-theme="dark"] .form-control:disabled,
+[data-theme="dark"] .form-control[readonly] {
+  background-color: var(--elara-card-bg);
+  opacity: 0.75;
+}
+
+[data-theme="dark"] .table {
+  color: var(--elara-text);
+  border-color: var(--elara-blush);
+}
+
+[data-theme="dark"] .table > :not(caption) > * > * {
+  background-color: transparent;
+  color: var(--elara-text);
+  border-bottom-color: var(--elara-blush);
+  box-shadow: none;
+}
+
+[data-theme="dark"] .dropdown-menu {
+  background-color: var(--elara-card-bg);
+  border-color: var(--elara-blush);
+}
+
+[data-theme="dark"] .dropdown-item {
+  color: var(--elara-text);
+}
+
+[data-theme="dark"] .dropdown-item:hover,
+[data-theme="dark"] .dropdown-item:focus {
+  background-color: var(--elara-blush);
+  color: var(--elara-text);
+}
+
+[data-theme="dark"] .dropdown-item-text {
+  color: var(--elara-text-muted);
+}
+
+[data-theme="dark"] .modal-content {
+  background-color: var(--elara-card-bg);
+  color: var(--elara-text);
+}
+
+[data-theme="dark"] .elara-especialidad-check {
+  background-color: var(--elara-card-bg);
+}
+
+[data-theme="dark"] .badge-elara-success {
+  background-color: rgba(168, 183, 154, 0.18);
+  color: #CFE0C3;
+}
+
+[data-theme="dark"] .badge-elara-danger {
+  background-color: rgba(199, 123, 108, 0.22);
+  color: #EEC3BA;
+}
+
+[data-theme="dark"] .badge-elara-pending {
+  background-color: rgba(201, 161, 90, 0.2);
+  color: #F0D9A8;
+}
+
+[data-theme="dark"] .elara-auth-body {
+  background: linear-gradient(160deg, var(--elara-bg-soft) 0%, var(--elara-bg) 55%);
+}
+
+/* Transición suave al alternar tema (toggle sol/luna del navbar): el JS solo
+   cambia el atributo data-theme, el color en sí lo anima el navegador. */
+*,
+*::before,
+*::after {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* ==========================================================================
+   Reset / base
+   ========================================================================== */
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--elara-bg);
+  color: var(--elara-text);
+  min-height: 100vh;
+  margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6,
+.font-heading {
+  font-family: var(--font-heading);
+  color: var(--elara-text);
+  font-weight: 600;
+}
+
+a {
+  color: var(--elara-accent);
+  text-decoration: none;
+  transition: var(--elara-transition);
+}
+
+a:hover {
+  color: var(--elara-charcoal);
+}
+
+small, .text-muted {
+  color: var(--elara-text-muted) !important;
+}
+
+::selection {
+  background-color: var(--elara-gold-soft);
+  color: var(--elara-charcoal);
+}
+
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+  box-shadow: 0 0 0 0.2rem rgba(201, 161, 90, 0.35);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--elara-gold);
+}
+
+/* ==========================================================================
+   Botones de marca
+   ========================================================================== */
+
+.btn {
+  border-radius: var(--elara-radius-sm);
+  font-weight: 500;
+  transition: var(--elara-transition);
+}
+
+.btn-elara {
+  background-color: var(--elara-accent);
+  border-color: var(--elara-accent);
+  color: var(--elara-ivory);
+}
+
+.btn-elara:hover,
+.btn-elara:focus {
+  background-color: var(--elara-accent-hover);
+  border-color: var(--elara-accent-hover);
+  color: var(--elara-charcoal);
+  transform: translateY(-2px);
+  box-shadow: var(--elara-shadow-hover);
+}
+
+.btn-outline-elara {
+  background-color: transparent;
+  border: 1.5px solid var(--elara-accent);
+  color: var(--elara-accent);
+}
+
+.btn-outline-elara:hover {
+  background-color: var(--elara-accent);
+  color: var(--elara-ivory);
+  transform: translateY(-2px);
+}
+
+.btn-elara-success {
+  background-color: var(--elara-success);
+  border-color: var(--elara-success);
+  color: var(--elara-ivory);
+}
+
+.btn-elara-danger {
+  background-color: var(--elara-danger);
+  border-color: var(--elara-danger);
+  color: var(--elara-ivory);
+}
+
+/* ==========================================================================
+   Badges / estados (éxito, cancelado, pendiente)
+   ========================================================================== */
+
+.badge-elara-success {
+  background-color: rgba(168, 183, 154, 0.2);
+  color: #5c6b52;
+  border: 1px solid var(--elara-success);
+}
+
+.badge-elara-danger {
+  background-color: rgba(199, 123, 108, 0.15);
+  color: #8a4c40;
+  border: 1px solid var(--elara-danger);
+}
+
+.badge-elara-pending {
+  background-color: rgba(201, 161, 90, 0.15);
+  color: #8a6a2f;
+  border: 1px solid var(--elara-accent);
+}
+
+/* ==========================================================================
+   Cards "soft UI" con micro-animación de entrada
+   ========================================================================== */
+
+.card-elara {
+  background-color: var(--elara-card-bg);
+  border: none;
+  border-radius: var(--elara-radius-lg);
+  box-shadow: var(--elara-shadow-soft);
+  transition: var(--elara-transition);
+  animation: elaraFadeInUp 0.5s ease both;
+}
+
+.card-elara:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--elara-shadow-hover);
+}
+
+.card-elara .card-header {
+  background-color: transparent;
+  border-bottom: 1px solid var(--elara-blush);
+  font-family: var(--font-heading);
+}
+
+/* Escalona la animación de varias cards en una misma grilla */
+.stagger-fade-in > * {
+  animation: elaraFadeInUp 0.5s ease both;
+}
+.stagger-fade-in > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-fade-in > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-fade-in > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-fade-in > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-fade-in > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-fade-in > *:nth-child(6) { animation-delay: 0.3s; }
+
+@keyframes elaraFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes elaraFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ==========================================================================
+   Navbar + logo "Elara"
+   ========================================================================== */
+
+.elara-navbar {
+  height: var(--elara-navbar-height);
+  background-color: var(--elara-ivory);
+  border-bottom: 1px solid var(--elara-blush);
+  box-shadow: 0 2px 12px rgba(43, 38, 32, 0.05);
+}
+
+.elara-logo {
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--elara-accent);
+  letter-spacing: 0.5px;
+  animation: elaraLogoAppear 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.elara-logo:hover {
+  color: var(--elara-accent-hover);
+}
+
+@keyframes elaraLogoAppear {
+  0% {
+    opacity: 0;
+    letter-spacing: 4px;
+    transform: translateY(-6px);
+  }
+  100% {
+    opacity: 1;
+    letter-spacing: 0.5px;
+    transform: translateY(0);
+  }
+}
+
+.elara-navbar .nav-link {
+  color: var(--elara-text);
+  font-weight: 500;
+  transition: var(--elara-transition);
+}
+
+.elara-navbar .nav-link:hover,
+.elara-navbar .nav-link.active {
+  color: var(--elara-accent);
+}
+
+/* ==========================================================================
+   Sidebar del panel administrativo (colapsable a solo íconos)
+   ========================================================================== */
+
+.elara-sidebar {
+  width: var(--elara-sidebar-width);
+  background-color: var(--elara-ivory);
+  border-right: 1px solid var(--elara-blush);
+  transition: var(--elara-transition);
+  min-height: calc(100vh - var(--elara-navbar-height));
+}
+
+.elara-sidebar .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--elara-text);
+  padding: 0.7rem 1.25rem;
+  border-radius: var(--elara-radius-sm);
+  margin: 0.15rem 0.6rem;
+  font-weight: 500;
+  transition: var(--elara-transition);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.elara-sidebar .nav-link i {
+  font-size: 1.15rem;
+  min-width: 1.5rem;
+  text-align: center;
+  color: var(--elara-warm-gray);
+  transition: var(--elara-transition);
+}
+
+.elara-sidebar .nav-link:hover {
+  background-color: var(--elara-blush);
+  color: var(--elara-charcoal);
+}
+
+.elara-sidebar .nav-link:hover i {
+  color: var(--elara-accent);
+}
+
+.elara-sidebar .nav-link.active {
+  background-color: var(--elara-accent);
+  color: var(--elara-ivory);
+}
+
+.elara-sidebar .nav-link.active i {
+  color: var(--elara-ivory);
+}
+
+.elara-sidebar .sidebar-section-title {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--elara-warm-gray);
+  padding: 1rem 1.25rem 0.35rem;
+}
+
+/* Estado colapsado: solo íconos */
+.elara-sidebar.collapsed {
+  width: var(--elara-sidebar-width-collapsed);
+}
+
+.elara-sidebar.collapsed .nav-link span,
+.elara-sidebar.collapsed .sidebar-section-title {
+  display: none;
+}
+
+.elara-sidebar.collapsed .nav-link {
+  justify-content: center;
+  padding: 0.7rem;
+}
+
+/* Mobile-first: en pantallas pequeñas el sidebar se colapsa a íconos por defecto */
+@media (max-width: 767.98px) {
+  .elara-sidebar {
+    width: var(--elara-sidebar-width-collapsed);
+    position: fixed;
+    z-index: 1030;
+  }
+
+  .elara-sidebar .nav-link span,
+  .elara-sidebar .sidebar-section-title {
+    display: none;
+  }
+
+  .elara-sidebar .nav-link {
+    justify-content: center;
+    padding: 0.7rem;
+  }
+
+  .elara-sidebar.expanded {
+    width: var(--elara-sidebar-width);
+  }
+
+  .elara-sidebar.expanded .nav-link span,
+  .elara-sidebar.expanded .sidebar-section-title {
+    display: inline;
+  }
+
+  .elara-sidebar.expanded .nav-link {
+    justify-content: flex-start;
+    padding: 0.7rem 1.25rem;
+  }
+
+  .elara-content {
+    margin-left: var(--elara-sidebar-width-collapsed);
+  }
+}
+
+@media (min-width: 768px) {
+  .elara-content {
+    margin-left: 0;
+  }
+}
+
+.elara-main-wrapper {
+  display: flex;
+  align-items: stretch;
+}
+
+.elara-content {
+  flex: 1;
+  min-width: 0;
+  padding: 1.75rem;
+  animation: elaraFadeIn 0.4s ease both;
+}
+
+/* Botón hamburguesa para colapsar/expandir sidebar */
+.elara-sidebar-toggle {
+  background: transparent;
+  border: 1px solid var(--elara-blush);
+  border-radius: var(--elara-radius-sm);
+  color: var(--elara-text);
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--elara-transition);
+}
+
+.elara-sidebar-toggle:hover {
+  background-color: var(--elara-blush);
+  color: var(--elara-accent);
+}
+
+/* Toggle sol/luna de tema (navbar) */
+.elara-theme-toggle {
+  background: transparent;
+  border: 1px solid var(--elara-blush);
+  border-radius: var(--elara-radius-sm);
+  color: var(--elara-accent);
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--elara-transition);
+}
+
+.elara-theme-toggle:hover {
+  background-color: var(--elara-blush);
+  transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+
+.elara-footer {
+  background-color: var(--elara-ivory);
+  border-top: 1px solid var(--elara-blush);
+  color: var(--elara-text-muted);
+  padding: 1.25rem 0;
+  font-size: 0.9rem;
+}
+
+.elara-footer .footer-brand {
+  font-family: var(--font-heading);
+  color: var(--elara-accent);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   Utilidades varias de marca
+   ========================================================================== */
+
+.text-elara-accent { color: var(--elara-accent) !important; }
+.text-elara-muted { color: var(--elara-text-muted) !important; }
+.text-elara-danger { color: var(--elara-terracotta) !important; }
+.bg-elara-blush { background-color: var(--elara-blush) !important; }
+.bg-elara-ivory { background-color: var(--elara-ivory) !important; }
+
+.elara-divider {
+  border: none;
+  border-top: 1px solid var(--elara-blush);
+  margin: 1.5rem 0;
+}
+
+/* ==========================================================================
+   Páginas de autenticación (login, recuperación de contraseña)
+   ========================================================================== */
+
+.elara-auth-body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, var(--elara-blush) 0%, var(--elara-ivory) 55%);
+  padding: 2rem 1rem;
+}
+
+.elara-auth-wrapper {
+  width: 100%;
+  max-width: 440px;
+  animation: elaraFadeInUp 0.5s ease both;
+}
+
+.elara-auth-card {
+  animation: none;
+}
+
+/* ==========================================================================
+   Avatares de cliente (foto de perfil o iniciales por defecto)
+   ========================================================================== */
+
+.elara-avatar-img {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--elara-blush);
+}
+
+.elara-avatar-placeholder {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background-color: var(--elara-blush);
+  color: var(--elara-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.25rem;
+  margin: 0 auto;
+}
+
+/* ==========================================================================
+   Etiquetas (ej. especialidades de un especialista)
+   ========================================================================== */
+
+.elara-tag {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background-color: var(--elara-blush);
+  color: var(--elara-charcoal);
+  font-size: 0.8rem;
+  border: 1px solid var(--elara-gold-soft);
+}
+
+.elara-especialidad-check {
+  background-color: var(--elara-ivory);
+  border: 1px solid var(--elara-blush);
+  border-radius: var(--elara-radius-sm);
+  padding: 0.4rem 0.75rem;
+}
+
+.elara-schedule-table th {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  color: var(--elara-text-muted);
+  font-size: 0.85rem;
+}
+
+/* ==========================================================================
+   Catálogo de servicios
+   ========================================================================== */
+
+.elara-service-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.elara-service-image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--elara-blush);
+  color: var(--elara-accent);
+  font-size: 2.5rem;
+}
+
+.elara-price-tag {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--elara-accent);
+  font-size: 1.1rem;
+}
+
+/* ==========================================================================
+   Calendario de citas (FullCalendar) — ajustes de marca
+   ========================================================================== */
+
+#calendario {
+  font-family: var(--font-body);
+}
+
+.fc .fc-toolbar-title {
+  font-family: var(--font-heading);
+  color: var(--elara-text);
+  font-size: 1.3rem;
+}
+
+.fc .fc-button-primary {
+  background-color: var(--elara-accent);
+  border-color: var(--elara-accent);
+  text-transform: capitalize;
+}
+
+.fc .fc-button-primary:hover {
+  background-color: var(--elara-accent-hover);
+  border-color: var(--elara-accent-hover);
+  color: var(--elara-charcoal);
+}
+
+.fc .fc-button-primary:disabled {
+  background-color: var(--elara-warm-gray);
+  border-color: var(--elara-warm-gray);
+}
+
+.fc .fc-button-primary.fc-button-active,
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+  background-color: var(--elara-charcoal);
+  border-color: var(--elara-charcoal);
+}
+
+.fc-event {
+  border-radius: 6px;
+  border: none;
+  padding: 1px 4px;
+  cursor: pointer;
+}
+
+.fc-daygrid-day.fc-day-today,
+.fc-timegrid-col.fc-day-today {
+  background-color: rgba(201, 161, 90, 0.08) !important;
+}
+
+/* ==========================================================================
+   Toasts de notificación
+   ========================================================================== */
+
+.elara-toast-success {
+  background-color: var(--elara-sage);
+  color: #fff;
+}
+
+.elara-toast-error {
+  background-color: var(--elara-terracotta);
+  color: #fff;
+}
+
+/* ==========================================================================
+   Inventario — indicadores de nivel de stock
+   ========================================================================== */
+
+.elara-row-bajo {
+  border-left: 4px solid var(--elara-terracotta);
+}
+
+.elara-row-cerca {
+  border-left: 4px solid var(--elara-gold);
+}
+
+.border-elara-danger {
+  border: 1px solid var(--elara-terracotta) !important;
+}
+
+/* Scrollbar sutil acorde a la marca (navegadores WebKit) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--elara-gold-soft);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-track {
+  background-color: var(--elara-blush);
+}

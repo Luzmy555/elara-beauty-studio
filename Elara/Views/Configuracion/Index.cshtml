@@ -1,0 +1,208 @@
+@model ConfiguracionNegocioViewModel
+@{
+    ViewData["Title"] = "Configuración";
+    var categorias = (List<CategoriaServicio>)ViewBag.Categorias;
+}
+
+<div class="mb-4">
+    <h1 class="h3 mb-1">Configuración</h1>
+    <p class="text-elara-muted mb-0">Datos del negocio, moneda, horario general y categorías de servicio.</p>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert badge-elara-success mb-4">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert badge-elara-danger mb-4">@TempData["ErrorMessage"]</div>
+}
+
+<div class="card card-elara mb-4">
+    <div class="card-body p-4">
+        <h5 class="card-title font-heading mb-3">Datos del negocio</h5>
+        <div asp-validation-summary="ModelOnly" class="text-elara-accent mb-3"></div>
+        <form asp-controller="Configuracion" asp-action="GuardarNegocio" method="post" enctype="multipart/form-data">
+            <div class="row g-3">
+                <div class="col-12 col-md-3 text-center">
+                    @if (!string.IsNullOrEmpty(Model.LogoActualUrl))
+                    {
+                        <img src="@Model.LogoActualUrl" alt="Logo actual" class="elara-avatar-img mb-2" style="width:120px;height:120px;" />
+                    }
+                    else
+                    {
+                        <div class="elara-avatar-placeholder mb-2 mx-auto" style="width:120px;height:120px;font-size:2.5rem;">
+                            <i class="bi bi-image"></i>
+                        </div>
+                    }
+                    <div class="mb-2 text-start">
+                        <label asp-for="Logo" class="form-label small"></label>
+                        <input asp-for="Logo" type="file" class="form-control form-control-sm" accept=".jpg,.jpeg,.png,.webp" />
+                        <span asp-validation-for="Logo" class="text-elara-accent small"></span>
+                    </div>
+                    <p class="text-elara-muted small mb-0">JPG, PNG o WEBP. Máx. 2 MB.</p>
+                </div>
+
+                <div class="col-12 col-md-9">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="NombreSalon" class="form-label"></label>
+                            <input asp-for="NombreSalon" class="form-control" />
+                            <span asp-validation-for="NombreSalon" class="text-elara-accent small"></span>
+                            <div class="form-text">Es el nombre que se muestra en todo el sistema (navbar, pie de página).</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Moneda" class="form-label"></label>
+                            <select asp-for="Moneda" class="form-select" asp-items="Html.GetEnumSelectList<Moneda>()"></select>
+                            <span asp-validation-for="Moneda" class="text-elara-accent small"></span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Direccion" class="form-label"></label>
+                        <input asp-for="Direccion" class="form-control" placeholder="Ej: Av. Principal #123, Santo Domingo" />
+                        <span asp-validation-for="Direccion" class="text-elara-accent small"></span>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Telefono" class="form-label"></label>
+                            <input asp-for="Telefono" class="form-control" placeholder="Ej: +1 809-555-0000" />
+                            <span asp-validation-for="Telefono" class="text-elara-accent small"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="EmailContacto" class="form-label"></label>
+                            <input asp-for="EmailContacto" class="form-control" autocomplete="off" />
+                            <span asp-validation-for="EmailContacto" class="text-elara-accent small"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-2 mt-2">
+                <label class="form-label d-block mb-2">Horario general de atención</label>
+                <p class="text-elara-muted small mb-2">
+                    Días y horas en que abre el salón (distinto del horario individual de cada especialista, que se define en Empleados).
+                </p>
+                <div class="table-responsive">
+                    <table class="table align-middle elara-schedule-table">
+                        <thead>
+                            <tr>
+                                <th>Día</th>
+                                <th>Abierto</th>
+                                <th>Hora apertura</th>
+                                <th>Hora cierre</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (var i = 0; i < Model.Horarios.Count; i++)
+                            {
+                                <tr>
+                                    <td>
+                                        @Model.Horarios[i].NombreDia
+                                        <input type="hidden" asp-for="Horarios[i].DiaSemana" />
+                                        <input type="hidden" asp-for="Horarios[i].NombreDia" />
+                                    </td>
+                                    <td>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input js-dia-trabaja" type="checkbox"
+                                                   asp-for="Horarios[i].Abierto" data-index="@i" />
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <input type="time" class="form-control form-control-sm js-hora-inicio"
+                                               asp-for="Horarios[i].HoraApertura" data-index="@i"
+                                               disabled="@(!Model.Horarios[i].Abierto)" />
+                                    </td>
+                                    <td>
+                                        <input type="time" class="form-control form-control-sm js-hora-fin"
+                                               asp-for="Horarios[i].HoraCierre" data-index="@i"
+                                               disabled="@(!Model.Horarios[i].Abierto)" />
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <span asp-validation-for="Horarios" class="text-elara-accent small"></span>
+            </div>
+
+            <input type="hidden" asp-for="LogoActualUrl" />
+
+            <button type="submit" class="btn btn-elara mt-2">
+                <i class="bi bi-check2 me-1"></i> Guardar cambios
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="card card-elara">
+    <div class="card-body p-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+            <h5 class="card-title font-heading mb-0">Categorías de servicio</h5>
+            <a asp-controller="Configuracion" asp-action="CategoriaCreate" class="btn btn-elara btn-sm">
+                <i class="bi bi-plus-lg me-1"></i> Nueva categoría
+            </a>
+        </div>
+        <p class="text-elara-muted small mb-3">
+            Se usan para clasificar el catálogo de Servicios. Agrega las que necesites (Cejas, Pestañas, Depilación, Maquillaje...) sin tocar código.
+        </p>
+
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Estado</th>
+                        <th class="text-end">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!categorias.Any())
+                    {
+                        <tr>
+                            <td colspan="3" class="text-center text-elara-muted py-4">Aún no hay categorías registradas.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var categoria in categorias)
+                        {
+                            <tr>
+                                <td>@categoria.Nombre</td>
+                                <td>
+                                    <span class="badge @(categoria.Activo ? "badge-elara-success" : "badge-elara-danger")">
+                                        @(categoria.Activo ? "Activa" : "Inactiva")
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <a asp-controller="Configuracion" asp-action="CategoriaEdit" asp-route-id="@categoria.Id"
+                                       class="btn btn-sm btn-outline-elara" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form asp-controller="Configuracion" asp-action="CategoriaCambiarEstado" asp-route-id="@categoria.Id"
+                                          method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm @(categoria.Activo ? "btn-outline-elara" : "btn-elara-success")"
+                                                title="@(categoria.Activo ? "Desactivar" : "Activar")">
+                                            <i class="bi @(categoria.Activo ? "bi-toggle-on" : "bi-toggle-off")"></i>
+                                        </button>
+                                    </form>
+                                    <form asp-controller="Configuracion" asp-action="CategoriaEliminar" asp-route-id="@categoria.Id"
+                                          method="post" class="d-inline"
+                                          onsubmit="return confirm('¿Eliminar la categoría &quot;@categoria.Nombre&quot;? Solo se puede eliminar si ningún servicio la usa.');">
+                                        <button type="submit" class="btn btn-sm btn-outline-elara text-elara-danger" title="Eliminar">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/empleados.js" asp-append-version="true"></script>
+}

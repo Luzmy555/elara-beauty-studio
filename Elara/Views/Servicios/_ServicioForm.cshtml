@@ -1,0 +1,75 @@
+@model ServicioFormViewModel
+
+<div class="row g-3">
+    <div class="col-12 col-md-4 text-center">
+        @if (!string.IsNullOrEmpty(Model.ImagenActualUrl))
+        {
+            <img src="@Model.ImagenActualUrl" alt="Imagen actual" class="elara-service-image mb-2 rounded" />
+        }
+        else
+        {
+            <div class="elara-service-image elara-service-image-placeholder mb-2 rounded">
+                <i class="bi bi-gem"></i>
+            </div>
+        }
+        <div class="mb-2 text-start">
+            <label asp-for="Imagen" class="form-label small"></label>
+            <input asp-for="Imagen" type="file" class="form-control form-control-sm" accept=".jpg,.jpeg,.png,.webp" />
+            <span asp-validation-for="Imagen" class="text-elara-accent small"></span>
+        </div>
+        <p class="text-elara-muted small mb-0">JPG, PNG o WEBP. Máx. 2 MB.</p>
+    </div>
+
+    <div class="col-12 col-md-8">
+        <div class="mb-3">
+            <label asp-for="Nombre" class="form-label"></label>
+            <input asp-for="Nombre" class="form-control" autofocus placeholder="Ej: Manicura Gel" />
+            <span asp-validation-for="Nombre" class="text-elara-accent small"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="CategoriaServicioId" class="form-label"></label>
+            <select asp-for="CategoriaServicioId" class="form-select">
+                <option value="">Selecciona una categoría...</option>
+                @foreach (var categoria in Model.CategoriasDisponibles)
+                {
+                    <option value="@categoria.Id">@categoria.Nombre</option>
+                }
+            </select>
+            <span asp-validation-for="CategoriaServicioId" class="text-elara-accent small"></span>
+            @if (!Model.CategoriasDisponibles.Any())
+            {
+                <div class="form-text text-elara-accent">
+                    No hay categorías activas. Crea una desde
+                    <a asp-controller="Configuracion" asp-action="Index">Configuración</a>.
+                </div>
+            }
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="DuracionMinutos" class="form-label"></label>
+                <div class="input-group">
+                    <input asp-for="DuracionMinutos" type="number" min="1" step="1" class="form-control" />
+                    <span class="input-group-text">min</span>
+                </div>
+                <span asp-validation-for="DuracionMinutos" class="text-elara-accent small"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="Precio" class="form-label"></label>
+                <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input asp-for="Precio" type="number" min="0.01" step="0.01" class="form-control" />
+                </div>
+                <span asp-validation-for="Precio" class="text-elara-accent small"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mb-4">
+    <label asp-for="Descripcion" class="form-label"></label>
+    <textarea asp-for="Descripcion" class="form-control" rows="3" placeholder="Describe el servicio para el catálogo..."></textarea>
+    <span asp-validation-for="Descripcion" class="text-elara-accent small"></span>
+</div>
+
+<input type="hidden" asp-for="Id" />
+<input type="hidden" asp-for="ImagenActualUrl" />

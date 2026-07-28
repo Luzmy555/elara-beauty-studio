@@ -1,0 +1,48 @@
+@model List<Producto>
+@{
+    ViewData["Title"] = "Productos por reabastecer";
+}
+
+<div class="mb-4">
+    <h1 class="h3 mb-1">Productos por reabastecer</h1>
+    <p class="text-elara-muted mb-0">Productos en o por debajo de su cantidad mínima configurada.</p>
+</div>
+
+<div class="row g-4 stagger-fade-in">
+    @if (!Model.Any())
+    {
+        <div class="col-12">
+            <div class="card card-elara text-center py-5">
+                <i class="bi bi-check-circle fs-1 text-elara-accent"></i>
+                <p class="text-elara-muted mt-3 mb-0">Todo el inventario está por encima del mínimo. ¡Buen trabajo!</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        foreach (var producto in Model)
+        {
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="card card-elara h-100 border-elara-danger">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge bg-elara-blush text-elara-accent">@producto.Categoria</span>
+                            <span class="badge badge-elara-danger">
+                                <i class="bi bi-exclamation-triangle me-1"></i>Bajo mínimo
+                            </span>
+                        </div>
+                        <h5 class="card-title mb-1">@producto.Nombre</h5>
+                        <p class="text-elara-muted small mb-3">@producto.Marca</p>
+                        <p class="mb-3">
+                            Quedan <strong class="text-elara-accent">@producto.CantidadActual.ToString("0.##") @producto.UnidadMedida</strong>
+                            de un mínimo de @producto.CantidadMinima.ToString("0.##").
+                        </p>
+                        <a asp-controller="Productos" asp-action="Details" asp-route-id="@producto.Id" class="btn btn-sm btn-elara w-100">
+                            <i class="bi bi-box-arrow-in-down me-1"></i> Registrar compra
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>

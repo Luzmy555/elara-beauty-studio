@@ -1,0 +1,10 @@
+@model CategoriaServicioFormViewModel
+
+<div class="mb-3">
+    <label asp-for="Nombre" class="form-label"></label>
+    <input asp-for="Nombre" class="form-control" autofocus placeholder="Ej: Cejas" />
+    <span asp-validation-for="Nombre" class="text-elara-accent small"></span>
+</div>
+
+<input type="hidden" asp-for="Id" />
+<input type="hidden" asp-for="Activo" />

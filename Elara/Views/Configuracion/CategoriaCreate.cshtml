@@ -1,0 +1,28 @@
+@model CategoriaServicioFormViewModel
+@{
+    ViewData["Title"] = "Nueva categoría";
+}
+
+<div class="mb-4">
+    <h1 class="h3 mb-1">Nueva categoría de servicio</h1>
+    <p class="text-elara-muted">Quedará disponible de inmediato al crear o editar un servicio.</p>
+</div>
+
+<div class="card card-elara" style="max-width: 560px;">
+    <div class="card-body p-4">
+        <div asp-validation-summary="ModelOnly" class="text-elara-accent mb-3"></div>
+        <form asp-controller="Configuracion" asp-action="CategoriaCreate" method="post">
+            <partial name="_CategoriaForm" model="Model" />
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-elara">
+                    <i class="bi bi-check2 me-1"></i> Guardar categoría
+                </button>
+                <a asp-controller="Configuracion" asp-action="Index" class="btn btn-outline-elara">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

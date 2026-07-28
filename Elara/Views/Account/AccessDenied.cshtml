@@ -1,0 +1,20 @@
+@{
+    ViewData["Title"] = "Acceso denegado";
+    Layout = "_Layout";
+    var isEspecialista = User.IsInRole("Especialista");
+}
+
+<div class="text-center py-5">
+    <i class="bi bi-shield-lock fs-1 text-elara-accent"></i>
+    <h1 class="h3 mt-3 mb-2">Acceso denegado</h1>
+    <p class="text-elara-muted">No tienes permisos para ver esta sección.</p>
+
+    @if (isEspecialista)
+    {
+        <a asp-controller="Agenda" asp-action="Index" class="btn btn-elara mt-3">Ir a mi agenda</a>
+    }
+    else
+    {
+        <a asp-controller="Home" asp-action="Index" class="btn btn-elara mt-3">Volver al inicio</a>
+    }
+</div>

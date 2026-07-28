@@ -1,0 +1,33 @@
+@model ClienteFormViewModel
+@{
+    ViewData["Title"] = "Editar cliente";
+}
+
+<div class="mb-4 d-flex flex-wrap align-items-center gap-2">
+    <div>
+        <h1 class="h3 mb-1">Editar cliente</h1>
+        <p class="text-elara-muted mb-0">Actualiza los datos de @Model.NombreCompleto.</p>
+    </div>
+    <span class="badge @(Model.Activo ? "badge-elara-success" : "badge-elara-danger")">
+        @(Model.Activo ? "Activo" : "Inactivo")
+    </span>
+</div>
+
+<div class="card card-elara" style="max-width: 760px;">
+    <div class="card-body p-4">
+        <div asp-validation-summary="ModelOnly" class="text-elara-accent mb-3"></div>
+        <form asp-controller="Clientes" asp-action="Edit" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
+            <partial name="_ClienteForm" model="Model" />
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-elara">
+                    <i class="bi bi-check2 me-1"></i> Guardar cambios
+                </button>
+                <a asp-controller="Clientes" asp-action="Index" class="btn btn-outline-elara">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

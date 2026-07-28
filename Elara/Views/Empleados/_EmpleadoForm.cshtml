@@ -1,0 +1,123 @@
+@model EmpleadoFormViewModel
+
+<div class="row g-3">
+    <div class="col-12 col-md-4 text-center">
+        @if (!string.IsNullOrEmpty(Model.FotoActualUrl))
+        {
+            <img src="@Model.FotoActualUrl" alt="Foto actual" class="elara-avatar-img mb-2" style="width:140px;height:140px;" />
+        }
+        else
+        {
+            <div class="elara-avatar-placeholder mb-2 mx-auto" style="width:140px;height:140px;font-size:3rem;">
+                <i class="bi bi-person-fill"></i>
+            </div>
+        }
+        <div class="mb-2 text-start">
+            <label asp-for="Foto" class="form-label small"></label>
+            <input asp-for="Foto" type="file" class="form-control form-control-sm" accept=".jpg,.jpeg,.png,.webp" />
+            <span asp-validation-for="Foto" class="text-elara-accent small"></span>
+        </div>
+        <p class="text-elara-muted small mb-0">JPG, PNG o WEBP. Máx. 2 MB.</p>
+    </div>
+
+    <div class="col-12 col-md-8">
+        <div class="mb-3">
+            <label asp-for="NombreCompleto" class="form-label"></label>
+            <input asp-for="NombreCompleto" class="form-control" autofocus />
+            <span asp-validation-for="NombreCompleto" class="text-elara-accent small"></span>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="Telefono" class="form-label"></label>
+                <input asp-for="Telefono" class="form-control" placeholder="Ej: +504 9999-9999" />
+                <span asp-validation-for="Telefono" class="text-elara-accent small"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                @if (Model.EsEdicion)
+                {
+                    <input asp-for="Email" class="form-control" readonly />
+                    <div class="form-text">Es su usuario de acceso; no se puede cambiar desde aquí.</div>
+                }
+                else
+                {
+                    <input asp-for="Email" class="form-control" autocomplete="off" />
+                    <div class="form-text">Se usará para crear su cuenta de acceso (rol Especialista).</div>
+                }
+                <span asp-validation-for="Email" class="text-elara-accent small"></span>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label asp-for="ComisionPorcentaje" class="form-label"></label>
+            <div class="input-group" style="max-width: 200px;">
+                <input asp-for="ComisionPorcentaje" type="number" step="0.01" min="0" max="100" class="form-control" />
+                <span class="input-group-text">%</span>
+            </div>
+            <span asp-validation-for="ComisionPorcentaje" class="text-elara-accent small"></span>
+        </div>
+    </div>
+</div>
+
+<div class="mb-4">
+    <label class="form-label d-block">Especialidades</label>
+    <div class="d-flex flex-wrap gap-2">
+        @foreach (var especialidad in Model.EspecialidadesDisponibles)
+        {
+            var marcado = Model.EspecialidadesSeleccionadas.Contains(especialidad.Id);
+            <div class="form-check form-check-inline elara-especialidad-check">
+                <input class="form-check-input" type="checkbox" name="EspecialidadesSeleccionadas"
+                       value="@especialidad.Id" id="esp-@especialidad.Id" checked="@marcado" />
+                <label class="form-check-label" for="esp-@especialidad.Id">@especialidad.Nombre</label>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="mb-4">
+    <label class="form-label d-block mb-2">Horario semanal</label>
+    <div class="table-responsive">
+        <table class="table align-middle elara-schedule-table">
+            <thead>
+                <tr>
+                    <th>Día</th>
+                    <th>Trabaja</th>
+                    <th>Hora inicio</th>
+                    <th>Hora fin</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < Model.Horarios.Count; i++)
+                {
+                    <tr>
+                        <td>
+                            @Model.Horarios[i].NombreDia
+                            <input type="hidden" asp-for="Horarios[i].DiaSemana" />
+                            <input type="hidden" asp-for="Horarios[i].NombreDia" />
+                        </td>
+                        <td>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input js-dia-trabaja" type="checkbox"
+                                       asp-for="Horarios[i].Trabaja" data-index="@i" />
+                            </div>
+                        </td>
+                        <td>
+                            <input type="time" class="form-control form-control-sm js-hora-inicio"
+                                   asp-for="Horarios[i].HoraInicio" data-index="@i"
+                                   disabled="@(!Model.Horarios[i].Trabaja)" />
+                        </td>
+                        <td>
+                            <input type="time" class="form-control form-control-sm js-hora-fin"
+                                   asp-for="Horarios[i].HoraFin" data-index="@i"
+                                   disabled="@(!Model.Horarios[i].Trabaja)" />
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <span asp-validation-for="Horarios" class="text-elara-accent small"></span>
+</div>
+
+<input type="hidden" asp-for="Id" />
+<input type="hidden" asp-for="FotoActualUrl" />
+<input type="hidden" asp-for="EsEdicion" />

@@ -1,0 +1,62 @@
+@model ClienteFormViewModel
+
+<div class="row g-3">
+    <div class="col-12 col-md-4 text-center">
+        @if (!string.IsNullOrEmpty(Model.FotoActualUrl))
+        {
+            <img src="@Model.FotoActualUrl" alt="Foto actual" class="elara-avatar-img mb-2" style="width:140px;height:140px;" />
+        }
+        else
+        {
+            <div class="elara-avatar-placeholder mb-2 mx-auto" style="width:140px;height:140px;font-size:3rem;">
+                <i class="bi bi-person-fill"></i>
+            </div>
+        }
+        <div class="mb-2 text-start">
+            <label asp-for="Foto" class="form-label small"></label>
+            <input asp-for="Foto" type="file" class="form-control form-control-sm" accept=".jpg,.jpeg,.png,.webp" />
+            <span asp-validation-for="Foto" class="text-elara-accent small"></span>
+        </div>
+        <p class="text-elara-muted small mb-0">JPG, PNG o WEBP. Máx. 2 MB.</p>
+    </div>
+
+    <div class="col-12 col-md-8">
+        <div class="mb-3">
+            <label asp-for="NombreCompleto" class="form-label"></label>
+            <input asp-for="NombreCompleto" class="form-control" autofocus />
+            <span asp-validation-for="NombreCompleto" class="text-elara-accent small"></span>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="Telefono" class="form-label"></label>
+                <input asp-for="Telefono" class="form-control" placeholder="Ej: +504 9999-9999" />
+                <span asp-validation-for="Telefono" class="text-elara-accent small"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" autocomplete="off" />
+                <span asp-validation-for="Email" class="text-elara-accent small"></span>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label asp-for="FechaNacimiento" class="form-label"></label>
+            <input asp-for="FechaNacimiento" class="form-control" type="date" />
+            <span asp-validation-for="FechaNacimiento" class="text-elara-accent small"></span>
+        </div>
+    </div>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Alergias" class="form-label"></label>
+    <textarea asp-for="Alergias" class="form-control" rows="2" placeholder="Ej: alergia al acrílico, piel sensible..."></textarea>
+    <span asp-validation-for="Alergias" class="text-elara-accent small"></span>
+</div>
+
+<div class="mb-4">
+    <label asp-for="Preferencias" class="form-label"></label>
+    <textarea asp-for="Preferencias" class="form-control" rows="2" placeholder="Ej: color favorito, tipo de servicio preferido..."></textarea>
+    <span asp-validation-for="Preferencias" class="text-elara-accent small"></span>
+</div>
+
+<input type="hidden" asp-for="Id" />
+<input type="hidden" asp-for="FotoActualUrl" />

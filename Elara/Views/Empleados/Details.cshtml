@@ -1,0 +1,152 @@
+@model Empleado
+@{
+    ViewData["Title"] = Model.NombreCompleto;
+    var estadoBadge = Model.Estado switch
+    {
+        EstadoEmpleado.Activo => "badge-elara-success",
+        EstadoEmpleado.Vacaciones => "badge-elara-pending",
+        _ => "badge-elara-danger"
+    };
+}
+
+@functions {
+    private static string NombreDia(DayOfWeek dia) => dia switch
+    {
+        DayOfWeek.Monday => "Lunes",
+        DayOfWeek.Tuesday => "Martes",
+        DayOfWeek.Wednesday => "Miércoles",
+        DayOfWeek.Thursday => "Jueves",
+        DayOfWeek.Friday => "Viernes",
+        DayOfWeek.Saturday => "Sábado",
+        DayOfWeek.Sunday => "Domingo",
+        _ => dia.ToString()
+    };
+}
+
+<div class="mb-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+    <div>
+        <h1 class="h3 mb-1">@Model.NombreCompleto</h1>
+        <span class="badge @estadoBadge">@Model.Estado</span>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-controller="Empleados" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-elara">
+            <i class="bi bi-pencil me-1"></i> Editar
+        </a>
+        <a asp-controller="Empleados" asp-action="Index" class="btn btn-outline-elara">
+            <i class="bi bi-arrow-left me-1"></i> Volver
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12 col-md-4">
+        <div class="card card-elara text-center mb-4">
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(Model.FotoUrl))
+                {
+                    <img src="@Model.FotoUrl" alt="@Model.NombreCompleto" class="elara-avatar-img mb-3" style="width:160px;height:160px;" />
+                }
+                else
+                {
+                    <div class="elara-avatar-placeholder mb-3 mx-auto" style="width:160px;height:160px;font-size:3.5rem;">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                }
+                <p class="text-elara-muted small mb-1"><i class="bi bi-telephone me-1"></i>@Model.Telefono</p>
+                <p class="text-elara-muted small mb-0"><i class="bi bi-envelope me-1"></i>@Model.Email</p>
+            </div>
+        </div>
+
+        <div class="card card-elara">
+            <div class="card-body">
+                <h5 class="card-title font-heading mb-3">Especialidades</h5>
+                @if (!Model.EmpleadoEspecialidades.Any())
+                {
+                    <p class="text-elara-muted mb-0">Sin especialidades registradas.</p>
+                }
+                else
+                {
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var especialidad in Model.EmpleadoEspecialidades)
+                        {
+                            <span class="elara-tag">@especialidad.Especialidad?.Nombre</span>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-8">
+        <div class="card card-elara mb-4">
+            <div class="card-body">
+                <h5 class="card-title font-heading mb-3">
+                    <i class="bi bi-calendar2-week me-1"></i> Horario semanal
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr><th>Día</th><th>Estado</th><th>Horario</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var horario in Model.Horarios.OrderBy(h => ((int)h.DiaSemana + 6) % 7))
+                            {
+                                <tr>
+                                    <td>@NombreDia(horario.DiaSemana)</td>
+                                    <td>
+                                        @if (horario.Trabaja)
+                                        {
+                                            <span class="badge badge-elara-success">Trabaja</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-elara-danger">Descanso</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @(horario.Trabaja && horario.HoraInicio.HasValue && horario.HoraFin.HasValue
+                                            ? $"{horario.HoraInicio.Value:hh\\:mm} - {horario.HoraFin.Value:hh\\:mm}"
+                                            : "—")
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card card-elara">
+            <div class="card-body">
+                <h5 class="card-title font-heading mb-3">
+                    <i class="bi bi-cash-coin me-1"></i> Comisión (@Model.ComisionPorcentaje.ToString("0.##")% por servicio)
+                </h5>
+                <p class="text-elara-muted small">
+                    El cálculo automático de comisiones ganadas se completará cuando exista el módulo de
+                    Facturación (sumará el % de comisión sobre cada servicio facturado por este especialista).
+                    Por ahora el total mostrará $0.00.
+                </p>
+                <form id="comisionForm" class="row g-2 align-items-end" data-empleado-id="@Model.Id">
+                    <div class="col-auto">
+                        <label class="form-label small">Desde</label>
+                        <input type="date" name="desde" class="form-control form-control-sm" />
+                    </div>
+                    <div class="col-auto">
+                        <label class="form-label small">Hasta</label>
+                        <input type="date" name="hasta" class="form-control form-control-sm" />
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-sm btn-elara">Calcular</button>
+                    </div>
+                    <div class="col-auto">
+                        <span id="comisionResultado" class="fw-semibold text-elara-accent"></span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/empleados.js" asp-append-version="true"></script>
+}

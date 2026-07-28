@@ -1,0 +1,147 @@
+@model ProductoDetalleViewModel
+@{
+    ViewData["Title"] = Model.Producto.Nombre;
+    var nivel = Producto.CalcularNivelStock(Model.Producto.CantidadActual, Model.Producto.CantidadMinima);
+    var badgeClase = nivel switch
+    {
+        NivelStock.Bajo => "badge-elara-danger",
+        NivelStock.Cerca => "badge-elara-pending",
+        _ => "badge-elara-success"
+    };
+    var badgeTexto = nivel switch
+    {
+        NivelStock.Bajo => "Bajo mínimo",
+        NivelStock.Cerca => "Cerca del mínimo",
+        _ => "Stock OK"
+    };
+}
+
+<div class="mb-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+    <div>
+        <h1 class="h3 mb-1">@Model.Producto.Nombre</h1>
+        <span class="badge bg-elara-blush text-elara-accent me-1">@Model.Producto.Categoria</span>
+        <span class="badge @badgeClase">@badgeTexto</span>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-controller="Productos" asp-action="Edit" asp-route-id="@Model.Producto.Id" class="btn btn-outline-elara">
+            <i class="bi bi-pencil me-1"></i> Editar
+        </a>
+        <a asp-controller="Productos" asp-action="Index" class="btn btn-outline-elara">
+            <i class="bi bi-arrow-left me-1"></i> Volver
+        </a>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert badge-elara-success mb-4">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert badge-elara-danger mb-4">@TempData["ErrorMessage"]</div>
+}
+
+<div class="row g-4">
+    <div class="col-12 col-md-5">
+        <div class="card card-elara mb-4">
+            <div class="card-body">
+                <h5 class="card-title font-heading mb-3">Información</h5>
+                <dl class="row mb-0">
+                    <dt class="col-6 text-elara-muted">Marca</dt>
+                    <dd class="col-6">@Model.Producto.Marca</dd>
+
+                    <dt class="col-6 text-elara-muted">Stock actual</dt>
+                    <dd class="col-6">@Model.Producto.CantidadActual.ToString("0.##") @Model.Producto.UnidadMedida</dd>
+
+                    <dt class="col-6 text-elara-muted">Cantidad mínima</dt>
+                    <dd class="col-6">@Model.Producto.CantidadMinima.ToString("0.##") @Model.Producto.UnidadMedida</dd>
+
+                    <dt class="col-6 text-elara-muted">Precio de costo</dt>
+                    <dd class="col-6">$@Model.Producto.PrecioCosto.ToString("0.00")</dd>
+
+                    <dt class="col-6 text-elara-muted">Proveedor</dt>
+                    <dd class="col-6">@(Model.Producto.Proveedor ?? "—")</dd>
+
+                    <dt class="col-6 text-elara-muted">Última compra</dt>
+                    <dd class="col-6">@(Model.Producto.FechaUltimaCompra?.ToString("dd/MM/yyyy") ?? "—")</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="card card-elara">
+            <div class="card-body">
+                <h5 class="card-title font-heading mb-3">Registrar movimiento</h5>
+                <form asp-controller="Productos" asp-action="RegistrarMovimiento" method="post">
+                    <input type="hidden" name="ProductoId" value="@Model.Producto.Id" />
+                    <div class="mb-3">
+                        <label class="form-label">Tipo</label>
+                        <select name="Tipo" class="form-select">
+                            <option value="Entrada">Entrada (compra)</option>
+                            <option value="Salida">Salida (uso/consumo)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Cantidad</label>
+                        <input type="number" name="Cantidad" min="0.01" step="0.01" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Motivo</label>
+                        <input type="text" name="Motivo" class="form-control" placeholder="Ej: Compra a proveedor, uso en servicio..." required />
+                    </div>
+                    <button type="submit" class="btn btn-elara w-100">
+                        <i class="bi bi-arrow-left-right me-1"></i> Registrar movimiento
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-7">
+        <div class="card card-elara">
+            <div class="card-body">
+                <h5 class="card-title font-heading mb-3">
+                    <i class="bi bi-clock-history me-1"></i> Historial de movimientos
+                </h5>
+                @if (!Model.Movimientos.Any())
+                {
+                    <p class="text-elara-muted mb-0">Aún no hay movimientos registrados.</p>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Cantidad</th>
+                                    <th>Motivo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var movimiento in Model.Movimientos)
+                                {
+                                    <tr>
+                                        <td>@movimiento.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>
+                                            @if (movimiento.Tipo == TipoMovimiento.Entrada)
+                                            {
+                                                <span class="badge badge-elara-success">Entrada</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-elara-danger">Salida</span>
+                                            }
+                                        </td>
+                                        <td>@movimiento.Cantidad.ToString("0.##")</td>
+                                        <td>@movimiento.Motivo</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

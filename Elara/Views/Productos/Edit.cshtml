@@ -1,0 +1,28 @@
+@model ProductoFormViewModel
+@{
+    ViewData["Title"] = "Editar producto";
+}
+
+<div class="mb-4">
+    <h1 class="h3 mb-1">Editar producto</h1>
+    <p class="text-elara-muted">Actualiza los datos de @Model.Nombre.</p>
+</div>
+
+<div class="card card-elara" style="max-width: 780px;">
+    <div class="card-body p-4">
+        <div asp-validation-summary="ModelOnly" class="text-elara-accent mb-3"></div>
+        <form asp-controller="Productos" asp-action="Edit" asp-route-id="@Model.Id" method="post">
+            <partial name="_ProductoForm" model="Model" />
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-elara">
+                    <i class="bi bi-check2 me-1"></i> Guardar cambios
+                </button>
+                <a asp-controller="Productos" asp-action="Index" class="btn btn-outline-elara">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

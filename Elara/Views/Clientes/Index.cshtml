@@ -1,0 +1,35 @@
+@model ClienteIndexViewModel
+@{
+    ViewData["Title"] = "Clientes";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+        <h1 class="h3 mb-1">Clientes</h1>
+        <p class="text-elara-muted mb-0">Gestiona la información de tus clientas.</p>
+    </div>
+    <a asp-controller="Clientes" asp-action="Create" class="btn btn-elara">
+        <i class="bi bi-person-plus me-1"></i> Nuevo cliente
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert badge-elara-success mb-4">@TempData["SuccessMessage"]</div>
+}
+
+<div class="mb-4">
+    <div class="input-group">
+        <span class="input-group-text bg-elara-ivory"><i class="bi bi-search"></i></span>
+        <input type="text" id="clienteSearchInput" class="form-control"
+               placeholder="Buscar por nombre o teléfono..." value="@Model.SearchTerm" autocomplete="off" />
+    </div>
+</div>
+
+<div id="clientesContainer">
+    <partial name="_ClienteCards" model="Model" />
+</div>
+
+@section Scripts {
+    <script src="~/js/clientes.js" asp-append-version="true"></script>
+}

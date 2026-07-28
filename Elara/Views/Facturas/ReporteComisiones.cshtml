@@ -1,0 +1,73 @@
+@model List<ComisionEmpleadoViewModel>
+@{
+    ViewData["Title"] = "Reporte de comisiones";
+    var desde = (DateTime)ViewBag.Desde;
+    var hasta = (DateTime)ViewBag.Hasta;
+}
+
+<div class="mb-4">
+    <h1 class="h3 mb-1">Reporte de comisiones</h1>
+    <p class="text-elara-muted mb-0">Comisión ganada por especialista en el periodo seleccionado (solo facturas pagadas).</p>
+</div>
+
+<form method="get" asp-controller="Facturas" asp-action="ReporteComisiones" class="row g-2 mb-4">
+    <div class="col-auto">
+        <label class="form-label small mb-0">Desde</label>
+        <input type="date" name="desde" class="form-control" value="@desde.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="col-auto">
+        <label class="form-label small mb-0">Hasta</label>
+        <input type="date" name="hasta" class="form-control" value="@hasta.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="col-auto d-flex align-items-end">
+        <button type="submit" class="btn btn-outline-elara">
+            <i class="bi bi-search me-1"></i> Filtrar
+        </button>
+    </div>
+</form>
+
+<div class="card card-elara">
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Especialista</th>
+                    <th class="text-end">Servicios facturados</th>
+                    <th class="text-end">Total facturado</th>
+                    <th class="text-end">Comisión total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="4" class="text-center text-elara-muted py-5">Sin facturas pagadas en este periodo.</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var c in Model)
+                    {
+                        <tr>
+                            <td>@c.NombreCompleto</td>
+                            <td class="text-end">@c.CantidadServicios</td>
+                            <td class="text-end">$@c.TotalFacturado.ToString("0.00")</td>
+                            <td class="text-end text-elara-accent fw-semibold">$@c.TotalComision.ToString("0.00")</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+            @if (Model.Any())
+            {
+                <tfoot>
+                    <tr class="fw-bold">
+                        <td>Total</td>
+                        <td class="text-end">@Model.Sum(c => c.CantidadServicios)</td>
+                        <td class="text-end">$@Model.Sum(c => c.TotalFacturado).ToString("0.00")</td>
+                        <td class="text-end text-elara-accent">$@Model.Sum(c => c.TotalComision).ToString("0.00")</td>
+                    </tr>
+                </tfoot>
+            }
+        </table>
+    </div>
+</div>

@@ -1,0 +1,87 @@
+/* Estilos de la vista imprimible de facturas (Facturas/Imprimir).
+   Se carga solo desde _PrintLayout.cshtml, no en el resto del sistema. */
+
+.elara-print-body {
+  background-color: #f4f1ee;
+  padding: 2rem 1rem;
+  font-family: var(--font-body);
+  color: var(--elara-charcoal);
+}
+
+.elara-invoice {
+  max-width: 720px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 2.5rem;
+  border-radius: var(--elara-radius-lg);
+  box-shadow: var(--elara-shadow-soft);
+}
+
+.elara-invoice-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.elara-invoice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.elara-invoice-section {
+  margin: 1.5rem 0;
+}
+
+.elara-invoice-table {
+  width: 100%;
+}
+
+.elara-invoice-table th,
+.elara-invoice-table td {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--elara-blush);
+}
+
+.elara-invoice-totales {
+  max-width: 320px;
+  margin-left: auto;
+  padding-top: 0.5rem;
+}
+
+.elara-invoice-total-final {
+  border-top: 2px solid var(--elara-gold);
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  font-size: 1.2rem;
+  color: var(--elara-accent);
+}
+
+.elara-invoice-footer {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--elara-blush);
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .elara-print-body {
+    background-color: #fff;
+    padding: 0;
+  }
+
+  .elara-invoice {
+    max-width: 100%;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  @page {
+    margin: 1.5cm;
+  }
+}

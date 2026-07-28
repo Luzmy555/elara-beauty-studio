@@ -1,0 +1,83 @@
+@model Factura
+@{
+    ViewData["Title"] = "Factura #" + Model.Id;
+}
+
+<div class="mb-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+    <div>
+        <h1 class="h3 mb-1">Factura #@Model.Id.ToString("D6")</h1>
+        <span class="badge @(Model.Estado == EstadoFactura.Pagada ? "badge-elara-success" : "badge-elara-pending")">@Model.Estado</span>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-controller="Facturas" asp-action="Imprimir" asp-route-id="@Model.Id" target="_blank" class="btn btn-elara">
+            <i class="bi bi-printer me-1"></i> Ver / Imprimir
+        </a>
+        <a asp-controller="Citas" asp-action="Index" class="btn btn-outline-elara">
+            <i class="bi bi-arrow-left me-1"></i> Volver a Citas
+        </a>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert badge-elara-success mb-4">@TempData["SuccessMessage"]</div>
+}
+
+<div class="row g-4">
+    <div class="col-12 col-md-6">
+        <div class="card card-elara">
+            <div class="card-body">
+                <h5 class="card-title font-heading mb-3">Detalle</h5>
+                <dl class="row mb-0">
+                    <dt class="col-5 text-elara-muted">Cliente</dt>
+                    <dd class="col-7">@Model.Cliente?.NombreCompleto</dd>
+
+                    <dt class="col-5 text-elara-muted">Especialista</dt>
+                    <dd class="col-7">@Model.Empleado?.NombreCompleto</dd>
+
+                    <dt class="col-5 text-elara-muted">Servicio</dt>
+                    <dd class="col-7">@Model.Cita?.Servicio?.Nombre</dd>
+
+                    <dt class="col-5 text-elara-muted">Fecha de emisión</dt>
+                    <dd class="col-7">@Model.FechaEmision.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                    <dt class="col-5 text-elara-muted">Método de pago</dt>
+                    <dd class="col-7">@Model.MetodoPago</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6">
+        <div class="card card-elara">
+            <div class="card-body">
+                <h5 class="card-title font-heading mb-3">Totales</h5>
+                <div class="d-flex justify-content-between mb-1">
+                    <span>Subtotal</span>
+                    <span>$@Model.Subtotal.ToString("0.00")</span>
+                </div>
+                @if (Model.Descuento > 0)
+                {
+                    <div class="d-flex justify-content-between mb-1 text-elara-danger">
+                        <span>Descuento</span>
+                        <span>-$@Model.Descuento.ToString("0.00")</span>
+                    </div>
+                    <p class="text-elara-muted small">@Model.DescuentoJustificacion</p>
+                }
+                <div class="d-flex justify-content-between fw-bold fs-5 text-elara-accent border-top pt-2 mt-2">
+                    <span>Total</span>
+                    <span>$@Model.Total.ToString("0.00")</span>
+                </div>
+
+                @if (User.IsInRole("Administrador"))
+                {
+                    <hr class="elara-divider" />
+                    <div class="d-flex justify-content-between text-elara-muted small">
+                        <span>Comisión de @Model.Empleado?.NombreCompleto</span>
+                        <span>$@Model.ComisionEmpleado.ToString("0.00")</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

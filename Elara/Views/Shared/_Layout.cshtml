@@ -1,0 +1,182 @@
+@using ElaraMVC.Services.Interfaces
+@inject IThemeService ThemeService
+@inject IConfiguracionNegocioService ConfiguracionNegocioService
+@{
+    // Tema y datos del negocio se resuelven server-side y se pintan ya en el
+    // <html> inicial: evita el "flash" de tema/nombre incorrecto que se vería
+    // si se aplicaran recién con JS después de cargar la página.
+    var temaOscuro = await ThemeService.EsTemaOscuroAsync(User);
+    var configuracionNegocio = await ConfiguracionNegocioService.ObtenerAsync();
+    var nombreSalon = string.IsNullOrWhiteSpace(configuracionNegocio.NombreSalon) ? "Elara" : configuracionNegocio.NombreSalon;
+
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var isAdmin = User.IsInRole("Administrador");
+    var isRecepcionista = User.IsInRole("Recepcionista");
+    var isEspecialista = User.IsInRole("Especialista");
+}
+<!DOCTYPE html>
+<html lang="es" data-theme="@(temaOscuro ? "dark" : "light")">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - @nombreSalon</title>
+
+    <!-- Google Fonts: Playfair Display (títulos/logo) + Poppins (cuerpo) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Elara.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-md elara-navbar sticky-top px-2 px-md-3">
+            <div class="container-fluid">
+                <button class="elara-sidebar-toggle d-flex me-2 me-md-3" id="sidebarToggle" type="button" aria-label="Alternar menú">
+                    <i class="bi bi-list fs-5"></i>
+                </button>
+
+                <a class="navbar-brand elara-logo py-0 d-flex align-items-center gap-2" asp-area="" asp-controller="Home" asp-action="Index">
+                    @if (!string.IsNullOrEmpty(configuracionNegocio.LogoUrl))
+                    {
+                        <img src="@configuracionNegocio.LogoUrl" alt="@nombreSalon" style="width:32px;height:32px;object-fit:cover;border-radius:50%;" />
+                    }
+                    @nombreSalon
+                </a>
+
+                <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarElara"
+                        aria-controls="navbarElara" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarElara">
+                    <ul class="navbar-nav ms-md-auto align-items-md-center gap-md-2">
+                        <li class="nav-item">
+                            <button type="button" id="themeToggle" class="elara-theme-toggle" title="Cambiar tema"
+                                    aria-label="Cambiar entre modo claro y oscuro"
+                                    data-authenticated="@(User.Identity?.IsAuthenticated == true ? "true" : "false")">
+                                <i class="bi @(temaOscuro ? "bi-sun" : "bi-moon-stars") fs-5"></i>
+                            </button>
+                        </li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person-circle me-1"></i> @User.Identity!.Name
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                                    <li>
+                                        <span class="dropdown-item-text text-elara-muted small">
+                                            @(isAdmin ? "Administrador" : isRecepcionista ? "Recepcionista" : "Especialista")
+                                        </span>
+                                    </li>
+                                    @if (isAdmin)
+                                    {
+                                        <li><hr class="dropdown-divider" /></li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Account" asp-action="Register">
+                                                <i class="bi bi-person-plus me-1"></i> Registrar personal administrativo
+                                            </a>
+                                        </li>
+                                    }
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li class="px-3 pb-1">
+                                        <form asp-controller="Account" asp-action="Logout" method="post">
+                                            <button type="submit" class="btn btn-sm btn-outline-elara w-100">
+                                                <i class="bi bi-box-arrow-right me-1"></i> Cerrar sesión
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="elara-main-wrapper">
+        <aside class="elara-sidebar" id="elaraSidebar">
+            <nav class="d-flex flex-column pt-3">
+                @if (isAdmin || isRecepcionista)
+                {
+                    <div class="sidebar-section-title">Panel administrativo</div>
+                    <a class="nav-link @(currentController == "Home" ? "active" : "")" asp-controller="Home" asp-action="Index">
+                        <i class="bi bi-speedometer2"></i> <span>Dashboard</span>
+                    </a>
+                    <a class="nav-link @(currentController == "Citas" ? "active" : "")" asp-controller="Citas" asp-action="Index">
+                        <i class="bi bi-calendar2-check"></i> <span>Citas</span>
+                    </a>
+                    <a class="nav-link @(currentController == "Clientes" ? "active" : "")" asp-controller="Clientes" asp-action="Index">
+                        <i class="bi bi-people"></i> <span>Clientes</span>
+                    </a>
+                    <a class="nav-link @(currentController == "Servicios" ? "active" : "")" asp-controller="Servicios" asp-action="Index">
+                        <i class="bi bi-gem"></i> <span>Servicios</span>
+                    </a>
+                    <a class="nav-link @(currentController == "Facturas" && currentAction != "ReporteComisiones" ? "active" : "")" asp-controller="Facturas" asp-action="ReporteCaja">
+                        <i class="bi bi-receipt"></i> <span>Facturación</span>
+                    </a>
+                }
+
+                @if (isEspecialista)
+                {
+                    <div class="sidebar-section-title">Mi trabajo</div>
+                    <a class="nav-link @(currentController == "Agenda" ? "active" : "")" asp-controller="Agenda" asp-action="Index">
+                        <i class="bi bi-calendar2-week"></i> <span>Mi Agenda</span>
+                    </a>
+                }
+
+                @if (isAdmin)
+                {
+                    <div class="sidebar-section-title">Gestión</div>
+                    <a class="nav-link @(currentController == "Empleados" ? "active" : "")" asp-controller="Empleados" asp-action="Index">
+                        <i class="bi bi-person-badge"></i> <span>Empleados</span>
+                    </a>
+                    <a class="nav-link @(currentController == "Productos" ? "active" : "")" asp-controller="Productos" asp-action="Index">
+                        <i class="bi bi-boxes"></i> <span>Inventario</span>
+                    </a>
+                    <a class="nav-link @(currentController == "Reportes" ? "active" : "")" asp-controller="Reportes" asp-action="Index">
+                        <i class="bi bi-graph-up"></i> <span>Reportes</span>
+                    </a>
+                    <a class="nav-link @(currentController == "Facturas" && currentAction == "ReporteComisiones" ? "active" : "")" asp-controller="Facturas" asp-action="ReporteComisiones">
+                        <i class="bi bi-bar-chart-line"></i> <span>Comisiones</span>
+                    </a>
+                    <a class="nav-link @(currentController == "Configuracion" ? "active" : "")" asp-controller="Configuracion" asp-action="Index">
+                        <i class="bi bi-gear"></i> <span>Configuración</span>
+                    </a>
+                }
+            </nav>
+        </aside>
+
+        <div class="elara-content" id="elaraContent">
+            <main role="main">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <footer class="elara-footer text-center text-md-start">
+        <div class="container-fluid px-md-4">
+            <span class="footer-brand">@nombreSalon</span>
+            &middot; &copy; @DateTime.Now.Year Todos los derechos reservados
+            @if (isAdmin || isRecepcionista)
+            {
+                <text>&middot; <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-elara-muted">Privacidad</a></text>
+            }
+        </div>
+    </footer>
+
+    <form id="elaraAntiForgeryForm" class="d-none">@Html.AntiForgeryToken()</form>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/theme.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

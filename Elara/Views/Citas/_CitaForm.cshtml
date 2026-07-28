@@ -1,0 +1,66 @@
+@model CitaFormViewModel
+
+<form id="citaForm" data-es-edicion="@Model.EsEdicion.ToString().ToLower()">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="EsEdicion" />
+
+    <div class="mb-3 position-relative">
+        <label class="form-label">Cliente</label>
+        <input type="text" id="clienteInput" class="form-control" autocomplete="off"
+               placeholder="Busca por nombre o teléfono..." value="@Model.ClienteNombre" />
+        <input type="hidden" asp-for="ClienteId" id="ClienteId" />
+        <div id="clienteResultados" class="list-group position-absolute w-100 shadow-sm" style="z-index: 1080; display:none;"></div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label asp-for="ServicioId" class="form-label"></label>
+            <select asp-for="ServicioId" id="ServicioId" class="form-select">
+                <option value="">Selecciona un servicio...</option>
+                @foreach (var servicio in Model.ServiciosDisponibles)
+                {
+                    <option value="@servicio.Id" data-duracion="@servicio.DuracionMinutos" data-precio="@servicio.Precio.ToString("0.00")">
+                        @servicio.Nombre
+                    </option>
+                }
+            </select>
+            <div class="form-text" id="servicioInfo"></div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="FechaHoraInicio" class="form-label"></label>
+            <input asp-for="FechaHoraInicio" id="FechaHoraInicio" type="datetime-local" class="form-control" />
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="EmpleadoId" class="form-label"></label>
+        <select asp-for="EmpleadoId" id="EmpleadoId" class="form-select" disabled
+                data-actual="@(Model.EsEdicion ? Model.EmpleadoId.ToString() : "")">
+            <option value="">Selecciona servicio y horario primero...</option>
+        </select>
+        <div class="form-text text-elara-muted">Solo se muestran especialistas disponibles en ese horario.</div>
+    </div>
+
+    @if (Model.EsEdicion)
+    {
+        <div class="mb-3">
+            <label asp-for="Estado" class="form-label"></label>
+            <select asp-for="Estado" class="form-select" asp-items="Html.GetEnumSelectList<EstadoCita>()"></select>
+        </div>
+    }
+
+    <div class="mb-3">
+        <label asp-for="Notas" class="form-label"></label>
+        <textarea asp-for="Notas" class="form-control" rows="2"></textarea>
+    </div>
+
+    <div id="citaFormError" class="text-elara-accent small mb-2"></div>
+
+    <div class="d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-outline-elara" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-elara" id="btnGuardarCita">
+            <i class="bi bi-check2 me-1"></i> Guardar
+        </button>
+    </div>
+</form>
