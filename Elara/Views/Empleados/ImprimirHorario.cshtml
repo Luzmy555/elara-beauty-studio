@@ -1,0 +1,75 @@
+@model Empleado
+@{
+    ViewData["Title"] = "Horario de " + Model.NombreCompleto;
+    Layout = "_PrintLayout";
+}
+
+@functions {
+    private static string NombreDia(DayOfWeek dia) => dia switch
+    {
+        DayOfWeek.Monday => "Lunes",
+        DayOfWeek.Tuesday => "Martes",
+        DayOfWeek.Wednesday => "Miércoles",
+        DayOfWeek.Thursday => "Jueves",
+        DayOfWeek.Friday => "Viernes",
+        DayOfWeek.Saturday => "Sábado",
+        DayOfWeek.Sunday => "Domingo",
+        _ => dia.ToString()
+    };
+}
+
+<div class="elara-invoice">
+    <div class="elara-invoice-actions no-print">
+        <button type="button" class="btn btn-elara" onclick="window.print()">
+            <i class="bi bi-printer me-1"></i> Imprimir / Guardar PDF
+        </button>
+        <a asp-controller="Empleados" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-elara">
+            <i class="bi bi-arrow-left me-1"></i> Volver
+        </a>
+    </div>
+
+    <header class="elara-invoice-header">
+        <div>
+            <div class="elara-logo">Elara</div>
+            <p class="text-elara-muted mb-0">Horario semanal</p>
+        </div>
+        <div class="text-end">
+            <h2 class="h4 mb-1">@Model.NombreCompleto</h2>
+            <p class="mb-0 text-elara-muted small">@Model.Email</p>
+        </div>
+    </header>
+
+    <hr class="elara-divider" />
+
+    <section class="elara-invoice-section">
+        <div class="table-responsive">
+            <table class="table elara-invoice-table">
+                <thead>
+                    <tr>
+                        <th>Día</th>
+                        <th>Estado</th>
+                        <th class="text-end">Horario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var horario in Model.Horarios.OrderBy(h => ((int)h.DiaSemana + 6) % 7))
+                    {
+                        <tr>
+                            <td>@NombreDia(horario.DiaSemana)</td>
+                            <td>@(horario.Trabaja ? "Trabaja" : "Descanso")</td>
+                            <td class="text-end">
+                                @(horario.Trabaja && horario.HoraInicio.HasValue && horario.HoraFin.HasValue
+                                    ? $"{horario.HoraInicio.Value:hh\\:mm} - {horario.HoraFin.Value:hh\\:mm}"
+                                    : "—")
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <footer class="elara-invoice-footer">
+        <p class="text-center text-elara-muted small mb-0">Elara — horario generado el @DateTime.Now.ToString("dd/MM/yyyy")</p>
+    </footer>
+</div>

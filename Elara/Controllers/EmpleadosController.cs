@@ -36,6 +36,18 @@ public class EmpleadosController : Controller
     }
 
     [HttpGet]
+    public async Task<IActionResult> ImprimirHorario(int id)
+    {
+        var empleado = await _empleadoService.ObtenerPorIdAsync(id);
+        if (empleado == null)
+        {
+            return NotFound();
+        }
+
+        return View(empleado);
+    }
+
+    [HttpGet]
     public async Task<IActionResult> Create()
     {
         var model = await _empleadoService.ConstruirFormularioNuevoAsync();

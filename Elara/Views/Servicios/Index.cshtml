@@ -22,6 +22,14 @@
     <div class="alert badge-elara-success mb-4">@TempData["SuccessMessage"]</div>
 }
 
+<div class="mb-3">
+    <div class="input-group" style="max-width: 420px;">
+        <span class="input-group-text bg-elara-ivory"><i class="bi bi-search"></i></span>
+        <input type="text" id="servicioSearchInput" class="form-control"
+               placeholder="Buscar servicio por nombre..." autocomplete="off" />
+    </div>
+</div>
+
 <div class="mb-4 d-flex flex-wrap gap-2" id="categoriaFiltros">
     <button type="button" class="btn btn-sm btn-elara elara-pill" data-categoria="todos">Todos</button>
     @foreach (var categoria in categorias)
@@ -44,7 +52,7 @@
     {
         foreach (var servicio in Model)
         {
-            <div class="col-12 col-sm-6 col-lg-4" data-categoria="@servicio.CategoriaServicio?.Nombre">
+            <div class="col-12 col-sm-6 col-lg-4" data-categoria="@servicio.CategoriaServicio?.Nombre" data-nombre="@servicio.Nombre.ToLower()">
                 <div class="card card-elara h-100 overflow-hidden">
                     @if (!string.IsNullOrEmpty(servicio.ImagenUrl))
                     {
@@ -92,6 +100,7 @@
         }
     }
 </div>
+<p class="text-elara-muted text-center py-5" id="sinResultadosServicios" style="display:none;">No se encontraron servicios con ese nombre o categoría.</p>
 
 @section Scripts {
     <script src="~/js/servicios.js" asp-append-version="true"></script>
