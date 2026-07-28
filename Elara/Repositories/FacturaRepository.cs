@@ -37,7 +37,9 @@ public class FacturaRepository : IFacturaRepository
         return _context.Facturas
             .Include(f => f.Cliente)
             .Include(f => f.FacturaDetalles).ThenInclude(d => d.Servicio)
+            .Include(f => f.FacturaDetalles).ThenInclude(d => d.Producto)
             .Include(f => f.FacturaDetalles).ThenInclude(d => d.Empleado)
+            .Include(f => f.FacturaDetalles).ThenInclude(d => d.Devoluciones)
             .FirstOrDefaultAsync(f => f.Id == id);
     }
 
@@ -46,6 +48,7 @@ public class FacturaRepository : IFacturaRepository
         return _context.Facturas
             .Include(f => f.Cliente)
             .Include(f => f.FacturaDetalles).ThenInclude(d => d.Servicio)
+            .Include(f => f.FacturaDetalles).ThenInclude(d => d.Producto)
             .Include(f => f.FacturaDetalles).ThenInclude(d => d.Empleado)
             .Where(f => f.FechaEmision >= desde && f.FechaEmision < hasta)
             .OrderByDescending(f => f.FechaEmision)

@@ -151,11 +151,24 @@ public class FacturasController : Controller
         model.Subtotal = formulario.Subtotal;
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SubirComprobante(int facturaId, IFormFile archivo)
+    {
+        var (success, error) = await _facturaService.SubirComprobanteTransferenciaAsync(facturaId, archivo);
+        TempData[success ? "SuccessMessage" : "ErrorMessage"] = success
+            ? "Comprobante adjuntado correctamente."
+            : error;
+
+        return RedirectToAction(nameof(Details), new { id = facturaId });
+    }
+
     private async Task RecargarCatalogosAsync(VentaRapidaViewModel model)
     {
         var formulario = await _facturaService.ConstruirVentaRapidaFormularioAsync();
         model.ClientesDisponibles = formulario.ClientesDisponibles;
         model.EmpleadosDisponibles = formulario.EmpleadosDisponibles;
         model.ServiciosDisponibles = formulario.ServiciosDisponibles;
+        model.ProductosDisponibles = formulario.ProductosDisponibles;
     }
 }

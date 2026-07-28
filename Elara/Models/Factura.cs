@@ -37,6 +37,10 @@ public class Factura
     [NotMapped]
     public decimal? Devuelta => MontoRecibido.HasValue ? MontoRecibido.Value - Total : null;
 
+    // Solo aplica a MetodoPago.Transferencia; se puede subir al emitir la
+    // factura o después, desde el detalle. Opcional en ambos casos.
+    public string? ComprobanteTransferenciaUrl { get; set; }
+
     public DateTime FechaEmision { get; set; } = DateTime.Now;
 
     // El empleado y la comisión viven por línea (FacturaDetalle), no aquí:

@@ -1,0 +1,79 @@
+@model DevolucionFormViewModel
+@using ElaraMVC.Models
+@{
+    ViewData["Title"] = "Procesar devolución";
+}
+
+<div class="mb-4">
+    <h1 class="h3 mb-1">Procesar devolución</h1>
+    <p class="text-elara-muted">Reintegra el producto al stock y registra la salida de dinero.</p>
+</div>
+
+<div class="card card-elara" style="max-width: 640px;">
+    <div class="card-body p-4">
+        <div asp-validation-summary="ModelOnly" class="text-elara-accent mb-3"></div>
+
+        <dl class="row mb-4">
+            <dt class="col-5 text-elara-muted">Producto</dt>
+            <dd class="col-7">@Model.ProductoNombre</dd>
+
+            <dt class="col-5 text-elara-muted">Cantidad facturada</dt>
+            <dd class="col-7">@Model.CantidadFacturada</dd>
+
+            <dt class="col-5 text-elara-muted">Ya devuelto</dt>
+            <dd class="col-7">@Model.CantidadYaDevuelta</dd>
+
+            <dt class="col-5 text-elara-muted">Disponible para devolver</dt>
+            <dd class="col-7">@Model.CantidadDisponible</dd>
+
+            <dt class="col-5 text-elara-muted">Precio unitario</dt>
+            <dd class="col-7">$@Model.PrecioUnitario.ToString("0.00")</dd>
+        </dl>
+
+        @if (Model.CantidadDisponible <= 0)
+        {
+            <p class="text-elara-muted">Esta línea ya no tiene unidades disponibles para devolver.</p>
+            <a asp-controller="Facturas" asp-action="ReporteCaja" class="btn btn-outline-elara">Volver</a>
+        }
+        else
+        {
+            <form asp-controller="Devoluciones" asp-action="Crear" method="post">
+                <input type="hidden" asp-for="FacturaDetalleId" />
+                <input type="hidden" asp-for="ProductoNombre" />
+                <input type="hidden" asp-for="CantidadFacturada" />
+                <input type="hidden" asp-for="CantidadYaDevuelta" />
+                <input type="hidden" asp-for="CantidadDisponible" />
+                <input type="hidden" asp-for="PrecioUnitario" />
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Cantidad" class="form-label"></label>
+                        <input asp-for="Cantidad" type="number" min="1" max="@Model.CantidadDisponible" class="form-control" />
+                        <span asp-validation-for="Cantidad" class="text-elara-accent small"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="MetodoReembolso" class="form-label"></label>
+                        <select asp-for="MetodoReembolso" class="form-select" asp-items="Html.GetEnumSelectList<MetodoPago>()"></select>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Motivo" class="form-label"></label>
+                    <textarea asp-for="Motivo" class="form-control" rows="2" placeholder="Ej: Producto defectuoso, cliente se arrepintió..."></textarea>
+                    <span asp-validation-for="Motivo" class="text-elara-accent small"></span>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-elara">
+                        <i class="bi bi-arrow-return-left me-1"></i> Confirmar devolución
+                    </button>
+                    <a asp-controller="Facturas" asp-action="ReporteCaja" class="btn btn-outline-elara">Cancelar</a>
+                </div>
+            </form>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

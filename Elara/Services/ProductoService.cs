@@ -37,6 +37,7 @@ public class ProductoService : IProductoService
             CantidadMinima = model.CantidadMinima,
             UnidadMedida = model.UnidadMedida,
             PrecioCosto = model.PrecioCosto,
+            PrecioVenta = model.PrecioVenta,
             Proveedor = model.Proveedor?.Trim(),
             FechaUltimaCompra = model.CantidadActual > 0 ? DateTime.Now : null
         };
@@ -74,6 +75,7 @@ public class ProductoService : IProductoService
         producto.CantidadMinima = model.CantidadMinima;
         producto.UnidadMedida = model.UnidadMedida;
         producto.PrecioCosto = model.PrecioCosto;
+        producto.PrecioVenta = model.PrecioVenta;
         producto.Proveedor = model.Proveedor?.Trim();
         // CantidadActual y FechaUltimaCompra NO se editan aquí: solo cambian a
         // través de RegistrarMovimientoAsync, para conservar el historial real.

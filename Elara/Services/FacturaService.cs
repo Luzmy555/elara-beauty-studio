@@ -2,6 +2,7 @@ using ElaraMVC.Models;
 using ElaraMVC.Repositories.Interfaces;
 using ElaraMVC.Services.Interfaces;
 using ElaraMVC.ViewModels;
+using Microsoft.AspNetCore.Http;
 
 namespace ElaraMVC.Services;
 
@@ -12,19 +13,31 @@ public class FacturaService : IFacturaService
     private readonly IClienteRepository _clienteRepository;
     private readonly IEmpleadoRepository _empleadoRepository;
     private readonly IServicioRepository _servicioRepository;
+    private readonly IProductoRepository _productoRepository;
+    private readonly IMovimientoInventarioRepository _movimientoInventarioRepository;
+    private readonly IDevolucionRepository _devolucionRepository;
+    private readonly IFotoUploadService _fotoUploadService;
 
     public FacturaService(
         IFacturaRepository repository,
         ICitaRepository citaRepository,
         IClienteRepository clienteRepository,
         IEmpleadoRepository empleadoRepository,
-        IServicioRepository servicioRepository)
+        IServicioRepository servicioRepository,
+        IProductoRepository productoRepository,
+        IMovimientoInventarioRepository movimientoInventarioRepository,
+        IDevolucionRepository devolucionRepository,
+        IFotoUploadService fotoUploadService)
     {
         _repository = repository;
         _citaRepository = citaRepository;
         _clienteRepository = clienteRepository;
         _empleadoRepository = empleadoRepository;
         _servicioRepository = servicioRepository;
+        _productoRepository = productoRepository;
+        _movimientoInventarioRepository = movimientoInventarioRepository;
+        _devolucionRepository = devolucionRepository;
+        _fotoUploadService = fotoUploadService;
     }
 
     public async Task<FacturaFormViewModel?> ConstruirFormularioAsync(int citaId)
@@ -129,21 +142,28 @@ public class FacturaService : IFacturaService
             .Where(s => s.Activo)
             .OrderBy(s => s.Nombre)
             .ToList();
+        var productos = (await _productoRepository.GetAllAsync(null, null))
+            .Where(p => p.CantidadActual > 0)
+            .OrderBy(p => p.Nombre)
+            .ToList();
 
         return new VentaRapidaViewModel
         {
             ClientesDisponibles = clientes,
             EmpleadosDisponibles = empleados,
             ServiciosDisponibles = servicios,
+            ProductosDisponibles = productos,
             Lineas = new List<VentaRapidaLineaViewModel> { new VentaRapidaLineaViewModel() }
         };
     }
 
     public async Task<(bool Success, string? Error, int? FacturaId)> CrearVentaRapidaAsync(VentaRapidaViewModel model)
     {
-        if (model.Lineas == null || model.Lineas.Count == 0)
+        var hayServicios = model.Lineas != null && model.Lineas.Count > 0;
+        var hayProductos = model.LineasProductos != null && model.LineasProductos.Count > 0;
+        if (!hayServicios && !hayProductos)
         {
-            return (false, "Agrega al menos un servicio a la venta.", null);
+            return (false, "Agrega al menos un servicio o producto a la venta.", null);
         }
 
         Cliente? cliente = null;
@@ -157,37 +177,87 @@ public class FacturaService : IFacturaService
         }
 
         var lineas = new List<(FacturaDetalle Detalle, decimal ComisionPorcentaje)>();
-        foreach (var linea in model.Lineas)
+
+        if (hayServicios)
         {
-            var servicio = await _servicioRepository.GetByIdAsync(linea.ServicioId);
-            if (servicio == null)
+            foreach (var linea in model.Lineas!)
             {
-                return (false, "Uno de los servicios seleccionados ya no existe.", null);
+                var servicio = await _servicioRepository.GetByIdAsync(linea.ServicioId);
+                if (servicio == null)
+                {
+                    return (false, "Uno de los servicios seleccionados ya no existe.", null);
+                }
+
+                var empleado = await _empleadoRepository.GetByIdAsync(linea.EmpleadoId);
+                if (empleado == null)
+                {
+                    return (false, "Uno de los especialistas seleccionados ya no existe.", null);
+                }
+
+                var cantidad = linea.Cantidad < 1 ? 1 : linea.Cantidad;
+
+                // A diferencia del flujo desde cita, aquí el precio SÍ lo decide
+                // quien factura (venta rápida en caja: promociones, precio
+                // negociado, etc.) — el catálogo solo sirve para precargar un
+                // valor por defecto en el formulario.
+                var precioUnitario = linea.PrecioUnitario;
+                var subtotalLinea = precioUnitario * cantidad;
+
+                lineas.Add((new FacturaDetalle
+                {
+                    ServicioId = servicio.Id,
+                    EmpleadoId = empleado.Id,
+                    Cantidad = cantidad,
+                    PrecioUnitario = precioUnitario,
+                    Subtotal = subtotalLinea
+                }, empleado.ComisionPorcentaje));
             }
+        }
 
-            var empleado = await _empleadoRepository.GetByIdAsync(linea.EmpleadoId);
-            if (empleado == null)
+        // Ventas de producto: valida stock disponible; la salida de inventario
+        // real se registra después de conocer el Id de cada FacturaDetalle.
+        var movimientosProducto = new List<(FacturaDetalle Detalle, Producto Producto, int Cantidad)>();
+        if (hayProductos)
+        {
+            foreach (var lineaProd in model.LineasProductos!)
             {
-                return (false, "Uno de los especialistas seleccionados ya no existe.", null);
+                var producto = await _productoRepository.GetByIdAsync(lineaProd.ProductoId);
+                if (producto == null)
+                {
+                    return (false, "Uno de los productos seleccionados ya no existe.", null);
+                }
+
+                var cantidad = lineaProd.Cantidad < 1 ? 1 : lineaProd.Cantidad;
+                if (cantidad > producto.CantidadActual)
+                {
+                    return (false, $"No hay suficiente stock de \"{producto.Nombre}\": quedan {producto.CantidadActual:0.##} {producto.UnidadMedida}.", null);
+                }
+
+                Empleado? empleado = null;
+                if (lineaProd.EmpleadoId.HasValue)
+                {
+                    empleado = await _empleadoRepository.GetByIdAsync(lineaProd.EmpleadoId.Value);
+                    if (empleado == null)
+                    {
+                        return (false, "Uno de los especialistas seleccionados ya no existe.", null);
+                    }
+                }
+
+                var precioUnitario = lineaProd.PrecioUnitario;
+                var subtotalLinea = precioUnitario * cantidad;
+
+                var detalle = new FacturaDetalle
+                {
+                    ProductoId = producto.Id,
+                    EmpleadoId = empleado?.Id,
+                    Cantidad = cantidad,
+                    PrecioUnitario = precioUnitario,
+                    Subtotal = subtotalLinea
+                };
+
+                lineas.Add((detalle, empleado?.ComisionPorcentaje ?? 0m));
+                movimientosProducto.Add((detalle, producto, cantidad));
             }
-
-            var cantidad = linea.Cantidad < 1 ? 1 : linea.Cantidad;
-
-            // A diferencia del flujo desde cita, aquí el precio SÍ lo decide
-            // quien factura (venta rápida en caja: promociones, precio
-            // negociado, etc.) — el catálogo solo sirve para precargar un
-            // valor por defecto en el formulario.
-            var precioUnitario = linea.PrecioUnitario;
-            var subtotalLinea = precioUnitario * cantidad;
-
-            lineas.Add((new FacturaDetalle
-            {
-                ServicioId = servicio.Id,
-                EmpleadoId = empleado.Id,
-                Cantidad = cantidad,
-                PrecioUnitario = precioUnitario,
-                Subtotal = subtotalLinea
-            }, empleado.ComisionPorcentaje));
         }
 
         if (model.Descuento > 0 && string.IsNullOrWhiteSpace(model.DescuentoJustificacion))
@@ -206,12 +276,15 @@ public class FacturaService : IFacturaService
         // El descuento general se reparte entre las líneas según su peso en
         // el subtotal, y la comisión de cada especialista se calcula sobre su
         // parte ya con el descuento aplicado (igual que en el flujo desde cita).
+        // Las líneas de producto sin especialista asignado quedan en comisión 0.
         foreach (var (detalle, comisionPorcentaje) in lineas)
         {
             var proporcion = subtotalGeneral == 0 ? 0m : detalle.Subtotal / subtotalGeneral;
             var descuentoLinea = Math.Round(model.Descuento * proporcion, 2);
             var totalLinea = detalle.Subtotal - descuentoLinea;
-            detalle.ComisionEmpleado = Math.Round(totalLinea * comisionPorcentaje / 100m, 2);
+            detalle.ComisionEmpleado = comisionPorcentaje == 0
+                ? 0m
+                : Math.Round(totalLinea * comisionPorcentaje / 100m, 2);
         }
 
         var telefonoContacto = cliente == null && !string.IsNullOrWhiteSpace(model.ClienteTelefonoContacto)
@@ -226,6 +299,20 @@ public class FacturaService : IFacturaService
             return (false, "El monto recibido es menor al total a cobrar.", null);
         }
 
+        // El comprobante de transferencia se valida/guarda ANTES de tocar la
+        // base de datos, igual que EmpleadoService.CrearAsync con la foto.
+        string? comprobanteUrl = null;
+        if (model.MetodoPago == MetodoPago.Transferencia && model.ComprobanteTransferencia != null)
+        {
+            var (success, pathOrError) = await _fotoUploadService.GuardarAsync(model.ComprobanteTransferencia, "comprobantes");
+            if (!success)
+            {
+                return (false, pathOrError, null);
+            }
+
+            comprobanteUrl = pathOrError;
+        }
+
         var factura = new Factura
         {
             ClienteId = cliente?.Id,
@@ -237,13 +324,58 @@ public class FacturaService : IFacturaService
             MetodoPago = model.MetodoPago,
             Estado = model.Estado,
             MontoRecibido = montoRecibido,
+            ComprobanteTransferenciaUrl = comprobanteUrl,
             FechaEmision = DateTime.Now,
             FacturaDetalles = lineas.Select(l => l.Detalle).ToList()
         };
 
         await GuardarConNumeroAsync(factura);
 
+        // Recién ahora cada FacturaDetalle tiene Id: se puede registrar la
+        // salida de inventario enlazada a la línea que la originó.
+        if (movimientosProducto.Count > 0)
+        {
+            foreach (var (detalle, producto, cantidad) in movimientosProducto)
+            {
+                producto.CantidadActual -= cantidad;
+                _productoRepository.Update(producto);
+
+                await _movimientoInventarioRepository.AddAsync(new MovimientoInventario
+                {
+                    ProductoId = producto.Id,
+                    Tipo = TipoMovimiento.Salida,
+                    Cantidad = cantidad,
+                    Fecha = DateTime.Now,
+                    Motivo = $"Venta - Factura {factura.NumeroFactura}",
+                    FacturaDetalleId = detalle.Id
+                });
+            }
+
+            await _movimientoInventarioRepository.SaveChangesAsync();
+        }
+
         return (true, null, factura.Id);
+    }
+
+    public async Task<(bool Success, string? Error)> SubirComprobanteTransferenciaAsync(int facturaId, IFormFile archivo)
+    {
+        var factura = await _repository.GetByIdAsync(facturaId);
+        if (factura == null)
+        {
+            return (false, "Factura no encontrada.");
+        }
+
+        var (success, pathOrError) = await _fotoUploadService.GuardarAsync(archivo, "comprobantes");
+        if (!success)
+        {
+            return (false, pathOrError);
+        }
+
+        _fotoUploadService.Eliminar(factura.ComprobanteTransferenciaUrl);
+        factura.ComprobanteTransferenciaUrl = pathOrError;
+        await _repository.SaveChangesAsync();
+
+        return (true, null);
     }
 
     // El correlativo (ej. "ELR-0001") se deriva del Id autoincremental, así
@@ -264,6 +396,7 @@ public class FacturaService : IFacturaService
         var hasta = desde.AddDays(1);
 
         var facturas = await _repository.GetEnRangoAsync(desde, hasta);
+        var devoluciones = await _devolucionRepository.GetEnRangoAsync(desde, hasta);
         var pagadas = facturas.Where(f => f.Estado == EstadoFactura.Pagada).ToList();
         var pendientes = facturas.Where(f => f.Estado == EstadoFactura.Pendiente).ToList();
 
@@ -277,7 +410,9 @@ public class FacturaService : IFacturaService
             CantidadFacturas = pagadas.Count,
             CantidadDesdeCita = facturas.Count(f => f.CitaId != null),
             CantidadVentaRapida = facturas.Count(f => f.CitaId == null),
-            Facturas = facturas
+            Facturas = facturas,
+            TotalDevoluciones = devoluciones.Sum(d => d.MontoReembolsado),
+            Devoluciones = devoluciones
         };
     }
 
@@ -287,15 +422,17 @@ public class FacturaService : IFacturaService
 
         var lineas = facturas
             .Where(f => f.Estado == EstadoFactura.Pagada)
-            .SelectMany(f => f.FacturaDetalles.Select(d => new
-            {
-                d.EmpleadoId,
-                Nombre = d.Empleado?.NombreCompleto ?? "—",
-                // Recalcula el total de la línea con el descuento general de
-                // su factura ya prorrateado, igual que al momento de emitirla.
-                TotalLinea = d.Subtotal - (f.Subtotal == 0 ? 0m : Math.Round(f.Descuento * d.Subtotal / f.Subtotal, 2)),
-                d.ComisionEmpleado
-            }));
+            .SelectMany(f => f.FacturaDetalles
+                .Where(d => d.EmpleadoId.HasValue)
+                .Select(d => new
+                {
+                    EmpleadoId = d.EmpleadoId!.Value,
+                    Nombre = d.Empleado?.NombreCompleto ?? "—",
+                    // Recalcula el total de la línea con el descuento general de
+                    // su factura ya prorrateado, igual que al momento de emitirla.
+                    TotalLinea = d.Subtotal - (f.Subtotal == 0 ? 0m : Math.Round(f.Descuento * d.Subtotal / f.Subtotal, 2)),
+                    d.ComisionEmpleado
+                }));
 
         return lineas
             .GroupBy(x => new { x.EmpleadoId, x.Nombre })

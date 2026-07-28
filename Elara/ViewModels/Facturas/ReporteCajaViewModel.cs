@@ -14,4 +14,10 @@ public class ReporteCajaViewModel
     public int CantidadDesdeCita { get; set; }
     public int CantidadVentaRapida { get; set; }
     public List<Factura> Facturas { get; set; } = new();
+
+    // "Egresos" del día: devoluciones procesadas (no gastos operativos, que
+    // el sistema no rastrea).
+    public decimal TotalDevoluciones { get; set; }
+    public decimal TotalNeto => TotalGeneral - TotalDevoluciones;
+    public List<Devolucion> Devoluciones { get; set; } = new();
 }

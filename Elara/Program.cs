@@ -85,6 +85,8 @@ try
     builder.Services.AddScoped<ICitaRepository, CitaRepository>();
     builder.Services.AddScoped<IDisponibilidadService, DisponibilidadService>();
     builder.Services.AddScoped<IFacturaRepository, FacturaRepository>();
+    builder.Services.AddScoped<IDevolucionRepository, DevolucionRepository>();
+    builder.Services.AddScoped<IDevolucionService, DevolucionService>();
     builder.Services.AddScoped<ICitaService, CitaService>();
     builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
     builder.Services.AddScoped<IMovimientoInventarioRepository, MovimientoInventarioRepository>();

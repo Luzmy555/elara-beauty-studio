@@ -13,7 +13,7 @@
     <div class="card-body p-4">
         <div asp-validation-summary="All" class="text-elara-accent mb-3"></div>
 
-        <form asp-controller="Facturas" asp-action="VentaRapida" method="post" id="ventaRapidaForm">
+        <form asp-controller="Facturas" asp-action="VentaRapida" method="post" id="ventaRapidaForm" enctype="multipart/form-data">
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Cliente</label>
@@ -146,6 +146,72 @@
 
             <hr class="elara-divider" />
 
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="text-elara-muted text-uppercase small mb-0">Productos</h6>
+                <button type="button" id="agregarLineaProductoBtn" class="btn btn-sm btn-outline-elara">
+                    <i class="bi bi-plus-lg me-1"></i> Agregar producto
+                </button>
+            </div>
+
+            <div class="row g-2 d-none d-md-flex text-elara-muted small mb-1">
+                <div class="col-md-3">Producto</div>
+                <div class="col-md-3">Vendido por (opcional)</div>
+                <div class="col-md-1">Cant.</div>
+                <div class="col-md-2">Precio unitario</div>
+                <div class="col-md-2">Subtotal</div>
+            </div>
+
+            <div id="lineasProductoContainer">
+            </div>
+            <p class="text-elara-muted small" id="sinProductosMensaje">No hay productos agregados a esta venta.</p>
+
+            <template id="lineaProductoTemplate">
+                <div class="row linea-producto-row align-items-end mb-2 g-2">
+                    <div class="col-md-3">
+                        <label class="form-label small d-md-none">Producto</label>
+                        <select name="LineasProductos[IDX].ProductoId" class="form-select linea-producto-select">
+                            <option value="">Selecciona…</option>
+                            @foreach (var producto in Model.ProductosDisponibles)
+                            {
+                                <option value="@producto.Id" data-precio="@producto.PrecioVenta.ToString(System.Globalization.CultureInfo.InvariantCulture)" data-stock="@producto.CantidadActual.ToString(System.Globalization.CultureInfo.InvariantCulture)">@producto.Nombre (stock: @producto.CantidadActual.ToString("0.##"))</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small d-md-none">Vendido por</label>
+                        <select name="LineasProductos[IDX].EmpleadoId" class="form-select">
+                            <option value="">— Sin especialista —</option>
+                            @foreach (var empleado in Model.EmpleadosDisponibles)
+                            {
+                                <option value="@empleado.Id">@empleado.NombreCompleto</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-1">
+                        <label class="form-label small d-md-none">Cant.</label>
+                        <input type="number" name="LineasProductos[IDX].Cantidad" min="1" value="1" class="form-control linea-producto-cantidad" />
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small d-md-none">Precio unitario</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" name="LineasProductos[IDX].PrecioUnitario" min="0" step="0.01" value="0.00" class="form-control linea-producto-precio" />
+                        </div>
+                    </div>
+                    <div class="col-8 col-md-2">
+                        <label class="form-label small d-md-none">Subtotal</label>
+                        <div class="form-control-plaintext fw-semibold linea-producto-subtotal">$0.00</div>
+                    </div>
+                    <div class="col-4 col-md-1 text-end">
+                        <button type="button" class="btn btn-sm btn-outline-elara quitar-linea-producto-btn" title="Quitar">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </template>
+
+            <hr class="elara-divider" />
+
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label asp-for="Descuento" class="form-label"></label>
@@ -182,6 +248,11 @@
                     <div class="col-md-4">
                         <label asp-for="Estado" class="form-label"></label>
                         <select asp-for="Estado" class="form-select" asp-items="Html.GetEnumSelectList<EstadoFactura>()"></select>
+                    </div>
+                    <div class="col-md-8" id="comprobanteTransferenciaWrapper">
+                        <label asp-for="ComprobanteTransferencia" class="form-label"></label>
+                        <input asp-for="ComprobanteTransferencia" type="file" accept="image/*" class="form-control" />
+                        <div class="form-text">Opcional — también se puede adjuntar después desde el detalle de la factura.</div>
                     </div>
                 </div>
 

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using ElaraMVC.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace ElaraMVC.ViewModels;
 
@@ -20,6 +21,22 @@ public class VentaRapidaLineaViewModel
     public decimal PrecioUnitario { get; set; }
 }
 
+public class VentaRapidaLineaProductoViewModel
+{
+    [Required(ErrorMessage = "Selecciona un producto.")]
+    public int ProductoId { get; set; }
+
+    // A diferencia del servicio, no siempre hay un especialista asociado a
+    // la venta de un producto (ej. lo vende la recepcionista directamente).
+    public int? EmpleadoId { get; set; }
+
+    [Range(1, 10000, ErrorMessage = "La cantidad debe ser al menos 1.")]
+    public int Cantidad { get; set; } = 1;
+
+    [Range(0, 1000000, ErrorMessage = "El precio no puede ser negativo.")]
+    public decimal PrecioUnitario { get; set; }
+}
+
 public class VentaRapidaViewModel : IValidatableObject
 {
     // Null = "Cliente sin registrar / Walk-in".
@@ -30,6 +47,7 @@ public class VentaRapidaViewModel : IValidatableObject
     public string? ClienteTelefonoContacto { get; set; }
 
     public List<VentaRapidaLineaViewModel> Lineas { get; set; } = new();
+    public List<VentaRapidaLineaProductoViewModel> LineasProductos { get; set; } = new();
 
     [Range(0, 1000000, ErrorMessage = "El descuento no puede ser negativo.")]
     [Display(Name = "Descuento")]
@@ -52,17 +70,26 @@ public class VentaRapidaViewModel : IValidatableObject
     [Display(Name = "Monto recibido")]
     public decimal? MontoRecibido { get; set; }
 
+    // Solo se usa con MetodoPago.Transferencia; opcional (se puede adjuntar
+    // después desde el detalle de la factura si no se sube aquí).
+    [Display(Name = "Comprobante de transferencia")]
+    public IFormFile? ComprobanteTransferencia { get; set; }
+
     // Para repoblar los selectores si el formulario vuelve por un error de validación.
     public List<Cliente> ClientesDisponibles { get; set; } = new();
     public List<Empleado> EmpleadosDisponibles { get; set; } = new();
     public List<Servicio> ServiciosDisponibles { get; set; } = new();
+    public List<Producto> ProductosDisponibles { get; set; } = new();
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        if (Lineas == null || Lineas.Count == 0)
+        var hayServicios = Lineas != null && Lineas.Count > 0;
+        var hayProductos = LineasProductos != null && LineasProductos.Count > 0;
+
+        if (!hayServicios && !hayProductos)
         {
             yield return new ValidationResult(
-                "Agrega al menos un servicio a la venta.",
+                "Agrega al menos un servicio o producto a la venta.",
                 new[] { nameof(Lineas) });
         }
 
@@ -73,9 +100,10 @@ public class VentaRapidaViewModel : IValidatableObject
                 new[] { nameof(DescuentoJustificacion) });
         }
 
-        if (MetodoPago == MetodoPago.Efectivo && MontoRecibido.HasValue && Lineas != null && Lineas.Count > 0)
+        if (MetodoPago == MetodoPago.Efectivo && MontoRecibido.HasValue)
         {
-            var subtotal = Lineas.Sum(l => l.PrecioUnitario * l.Cantidad);
+            var subtotal = (hayServicios ? Lineas!.Sum(l => l.PrecioUnitario * l.Cantidad) : 0m) +
+                (hayProductos ? LineasProductos!.Sum(l => l.PrecioUnitario * l.Cantidad) : 0m);
             var total = subtotal - Descuento;
             if (MontoRecibido.Value < total)
             {

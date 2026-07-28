@@ -61,6 +61,7 @@
                     <th>Marca</th>
                     <th>Stock</th>
                     <th>Precio costo</th>
+                    <th>Precio venta</th>
                     <th>Proveedor</th>
                     <th>Última compra</th>
                     <th>Estado</th>
@@ -71,7 +72,7 @@
                 @if (!Model.Productos.Any())
                 {
                     <tr>
-                        <td colspan="9" class="text-center text-elara-muted py-5">
+                        <td colspan="10" class="text-center text-elara-muted py-5">
                             No se encontraron productos con ese filtro.
                         </td>
                     </tr>
@@ -109,6 +110,7 @@
                                 <span class="text-elara-muted small">(mín. @producto.CantidadMinima.ToString("0.##"))</span>
                             </td>
                             <td>$@producto.PrecioCosto.ToString("0.00")</td>
+                            <td>$@producto.PrecioVenta.ToString("0.00")</td>
                             <td>@(producto.Proveedor ?? "—")</td>
                             <td>@(producto.FechaUltimaCompra?.ToString("dd/MM/yyyy") ?? "—")</td>
                             <td><span class="badge @badgeClase">@badgeTexto</span></td>

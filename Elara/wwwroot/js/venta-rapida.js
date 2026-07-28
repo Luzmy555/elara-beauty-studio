@@ -1,12 +1,18 @@
-// Formulario de venta rápida (Facturas/VentaRapida): líneas de servicio
-// dinámicas con precio editable, y la caja (método de pago, monto recibido,
-// devuelta). El servidor siempre revalida (el monto recibido no puede ser
-// menor al total); esto es solo para que la recepcionista vea los números
-// antes de confirmar.
+// Formulario de venta rápida (Facturas/VentaRapida): líneas de servicio y de
+// producto dinámicas con precio editable, y la caja (método de pago, monto
+// recibido, devuelta, comprobante de transferencia). El servidor siempre
+// revalida (stock disponible, monto recibido vs. total); esto es solo para
+// que la recepcionista vea los números antes de confirmar.
 (function () {
     var lineasContainer = document.getElementById("lineasContainer");
     var agregarBtn = document.getElementById("agregarLineaBtn");
     var template = document.getElementById("lineaTemplate");
+
+    var lineasProductoContainer = document.getElementById("lineasProductoContainer");
+    var agregarProductoBtn = document.getElementById("agregarLineaProductoBtn");
+    var templateProducto = document.getElementById("lineaProductoTemplate");
+    var sinProductosMensaje = document.getElementById("sinProductosMensaje");
+
     var descuentoInput = document.getElementById("descuentoInput");
     var subtotalPreview = document.getElementById("subtotalPreview");
     var descuentoPreview = document.getElementById("descuentoPreview");
@@ -18,23 +24,42 @@
     var montoRecibidoInput = document.getElementById("montoRecibidoInput");
     var devueltaWrapper = document.getElementById("devueltaWrapper");
     var devueltaPreview = document.getElementById("devueltaPreview");
+    var comprobanteWrapper = document.getElementById("comprobanteTransferenciaWrapper");
 
     if (!lineasContainer || !template) {
         return;
     }
 
-    function reindexar() {
-        var filas = lineasContainer.querySelectorAll(".linea-row");
+    function reindexarGrupo(container, rowClass, fieldPrefix) {
+        var filas = container.querySelectorAll("." + rowClass);
         filas.forEach(function (fila, index) {
             fila.querySelectorAll("[name]").forEach(function (campo) {
-                campo.name = campo.name.replace(/Lineas\[[^\]]*\]/, "Lineas[" + index + "]");
+                campo.name = campo.name.replace(new RegExp(fieldPrefix + "\\[[^\\]]*\\]"), fieldPrefix + "[" + index + "]");
             });
         });
+        return filas;
+    }
 
-        var botones = lineasContainer.querySelectorAll(".quitar-linea-btn");
-        botones.forEach(function (boton) {
-            boton.disabled = filas.length <= 1;
+    function actualizarBotonesQuitar(filas, btnClass, minimo) {
+        filas.forEach(function (fila) {
+            var boton = fila.querySelector("." + btnClass);
+            if (boton) {
+                boton.disabled = filas.length <= minimo;
+            }
         });
+    }
+
+    function reindexar() {
+        var filas = reindexarGrupo(lineasContainer, "linea-row", "Lineas");
+        actualizarBotonesQuitar(filas, "quitar-linea-btn", 1);
+    }
+
+    function reindexarProductos() {
+        var filas = reindexarGrupo(lineasProductoContainer, "linea-producto-row", "LineasProductos");
+        actualizarBotonesQuitar(filas, "quitar-linea-producto-btn", 0);
+        if (sinProductosMensaje) {
+            sinProductosMensaje.style.display = filas.length === 0 ? "" : "none";
+        }
     }
 
     function recalcularLinea(fila) {
@@ -49,10 +74,25 @@
         return subtotal;
     }
 
+    function recalcularLineaProducto(fila) {
+        var precioInput = fila.querySelector(".linea-producto-precio");
+        var cantidadInput = fila.querySelector(".linea-producto-cantidad");
+        var subtotalDiv = fila.querySelector(".linea-producto-subtotal");
+        var precio = parseFloat(precioInput.value) || 0;
+        var cantidad = parseFloat(cantidadInput.value) || 0;
+        var subtotal = precio * cantidad;
+
+        subtotalDiv.textContent = "$" + subtotal.toFixed(2);
+        return subtotal;
+    }
+
     function recalcularTotales() {
         var subtotalGeneral = 0;
         lineasContainer.querySelectorAll(".linea-row").forEach(function (fila) {
             subtotalGeneral += recalcularLinea(fila);
+        });
+        lineasProductoContainer.querySelectorAll(".linea-producto-row").forEach(function (fila) {
+            subtotalGeneral += recalcularLineaProducto(fila);
         });
 
         var descuento = parseFloat(descuentoInput.value) || 0;
@@ -69,6 +109,10 @@
         var esEfectivo = metodoPagoSelect.value === "Efectivo";
         montoRecibidoWrapper.style.display = esEfectivo ? "" : "none";
         devueltaWrapper.style.display = esEfectivo ? "" : "none";
+
+        if (comprobanteWrapper) {
+            comprobanteWrapper.style.display = metodoPagoSelect.value === "Transferencia" ? "" : "none";
+        }
 
         if (!esEfectivo) {
             return;
@@ -103,13 +147,46 @@
         });
     }
 
+    function agregarListenersFilaProducto(fila) {
+        fila.querySelectorAll(".linea-producto-precio, .linea-producto-cantidad").forEach(function (campo) {
+            campo.addEventListener("input", recalcularTotales);
+        });
+
+        var productoSelect = fila.querySelector(".linea-producto-select");
+        var precioInput = fila.querySelector(".linea-producto-precio");
+        var cantidadInput = fila.querySelector(".linea-producto-cantidad");
+        productoSelect.addEventListener("change", function () {
+            var opcion = productoSelect.options[productoSelect.selectedIndex];
+            precioInput.value = opcion ? (parseFloat(opcion.getAttribute("data-precio")) || 0).toFixed(2) : "0.00";
+            var stock = opcion ? parseFloat(opcion.getAttribute("data-stock")) || 0 : 0;
+            cantidadInput.max = stock || "";
+            recalcularTotales();
+        });
+
+        fila.querySelector(".quitar-linea-producto-btn").addEventListener("click", function () {
+            fila.remove();
+            reindexarProductos();
+            recalcularTotales();
+        });
+    }
+
     lineasContainer.querySelectorAll(".linea-row").forEach(agregarListenersFila);
     reindexar();
+
+    lineasProductoContainer.querySelectorAll(".linea-producto-row").forEach(agregarListenersFilaProducto);
+    reindexarProductos();
 
     agregarBtn.addEventListener("click", function () {
         lineasContainer.appendChild(template.content.cloneNode(true));
         reindexar();
         agregarListenersFila(lineasContainer.querySelector(".linea-row:last-child"));
+        recalcularTotales();
+    });
+
+    agregarProductoBtn.addEventListener("click", function () {
+        lineasProductoContainer.appendChild(templateProducto.content.cloneNode(true));
+        reindexarProductos();
+        agregarListenersFilaProducto(lineasProductoContainer.querySelector(".linea-producto-row:last-child"));
         recalcularTotales();
     });
 

@@ -67,6 +67,33 @@
     </div>
 </div>
 
+<div class="row g-4 mb-4">
+    <div class="col-12 col-sm-4">
+        <div class="card card-elara h-100">
+            <div class="card-body">
+                <h6 class="text-elara-muted text-uppercase small mb-1">Ingresos</h6>
+                <p class="fs-4 mb-0" style="color: var(--elara-accent);">$@Model.TotalGeneral.ToString("0.00")</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-4">
+        <div class="card card-elara h-100">
+            <div class="card-body">
+                <h6 class="text-elara-muted text-uppercase small mb-1">Egresos (devoluciones)</h6>
+                <p class="fs-4 mb-0 text-elara-danger">-$@Model.TotalDevoluciones.ToString("0.00")</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-4">
+        <div class="card card-elara h-100" style="background-color: var(--elara-charcoal);">
+            <div class="card-body">
+                <h6 class="text-uppercase small mb-1" style="color: var(--elara-gold-soft);">Neto</h6>
+                <p class="fs-4 mb-0" style="color: var(--elara-gold-soft);">$@Model.TotalNeto.ToString("0.00")</p>
+            </div>
+        </div>
+    </div>
+</div>
+
 @if (Model.TotalPendiente > 0)
 {
     <div class="alert badge-elara-pending mb-4">
@@ -107,7 +134,7 @@
                                 <span class="badge bg-secondary">@(factura.CitaId.HasValue ? "Cita" : "Rápida")</span>
                             </td>
                             <td>@(factura.Cliente?.NombreCompleto ?? "Sin registrar")</td>
-                            <td>@string.Join(", ", factura.FacturaDetalles.Select(d => d.Empleado?.NombreCompleto).Distinct())</td>
+                            <td>@string.Join(", ", factura.FacturaDetalles.Select(d => d.Empleado?.NombreCompleto).Where(n => !string.IsNullOrEmpty(n)).Distinct())</td>
                             <td>@factura.MetodoPago</td>
                             <td>
                                 <span class="badge @(factura.Estado == EstadoFactura.Pagada ? "badge-elara-success" : "badge-elara-pending")">
@@ -127,3 +154,45 @@
         </table>
     </div>
 </div>
+
+@if (Model.Devoluciones.Any())
+{
+    <div class="card card-elara mt-4">
+        <div class="card-body">
+            <h5 class="card-title font-heading mb-3">Devoluciones (egresos)</h5>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>N°</th>
+                            <th>Producto</th>
+                            <th>Factura original</th>
+                            <th class="text-end">Cantidad</th>
+                            <th class="text-end">Monto</th>
+                            <th>Método</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var devolucion in Model.Devoluciones)
+                        {
+                            <tr>
+                                <td>@devolucion.NumeroDevolucion</td>
+                                <td>@devolucion.FacturaDetalle?.Producto?.Nombre</td>
+                                <td>@devolucion.FacturaDetalle?.Factura?.NumeroFactura</td>
+                                <td class="text-end">@devolucion.Cantidad</td>
+                                <td class="text-end text-elara-danger">-$@devolucion.MontoReembolsado.ToString("0.00")</td>
+                                <td>@devolucion.MetodoReembolso</td>
+                                <td class="text-end">
+                                    <a asp-controller="Devoluciones" asp-action="Imprimir" asp-route-id="@devolucion.Id" class="btn btn-sm btn-outline-elara">
+                                        <i class="bi bi-printer"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}

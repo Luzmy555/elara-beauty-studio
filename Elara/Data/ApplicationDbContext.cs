@@ -23,6 +23,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<MovimientoInventario> MovimientosInventario => Set<MovimientoInventario>();
     public DbSet<Factura> Facturas => Set<Factura>();
     public DbSet<FacturaDetalle> FacturaDetalles => Set<FacturaDetalle>();
+    public DbSet<Devolucion> Devoluciones => Set<Devolucion>();
     public DbSet<ConfiguracionNegocio> ConfiguracionNegocio => Set<ConfiguracionNegocio>();
     public DbSet<HorarioNegocio> HorariosNegocio => Set<HorarioNegocio>();
 
@@ -115,6 +116,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(p => p.CantidadActual).HasPrecision(10, 2);
             entity.Property(p => p.CantidadMinima).HasPrecision(10, 2);
             entity.Property(p => p.PrecioCosto).HasPrecision(10, 2);
+            entity.Property(p => p.PrecioVenta).HasPrecision(10, 2);
         });
 
         modelBuilder.Entity<MovimientoInventario>(entity =>
@@ -125,6 +127,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .WithMany(p => p.Movimientos)
                 .HasForeignKey(m => m.ProductoId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(m => m.FacturaDetalle)
+                .WithMany()
+                .HasForeignKey(m => m.FacturaDetalleId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Factura>(entity =>
@@ -167,9 +174,25 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .HasForeignKey(d => d.ServicioId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            entity.HasOne(d => d.Producto)
+                .WithMany()
+                .HasForeignKey(d => d.ProductoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             entity.HasOne(d => d.Empleado)
                 .WithMany()
                 .HasForeignKey(d => d.EmpleadoId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Devolucion>(entity =>
+        {
+            entity.Property(d => d.MontoReembolsado).HasPrecision(10, 2);
+            entity.Property(d => d.NumeroDevolucion).HasMaxLength(20);
+
+            entity.HasOne(d => d.FacturaDetalle)
+                .WithMany(fd => fd.Devoluciones)
+                .HasForeignKey(d => d.FacturaDetalleId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 

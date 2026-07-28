@@ -103,6 +103,7 @@ public class ProductosController : Controller
             CantidadMinima = producto.CantidadMinima,
             UnidadMedida = producto.UnidadMedida,
             PrecioCosto = producto.PrecioCosto,
+            PrecioVenta = producto.PrecioVenta,
             Proveedor = producto.Proveedor,
             FechaUltimaCompra = producto.FechaUltimaCompra,
             EsEdicion = true

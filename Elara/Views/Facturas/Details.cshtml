@@ -5,12 +5,14 @@
 
     var nombreCliente = Model.Cliente?.NombreCompleto ?? "Cliente sin registrar";
     var telefonoWhatsApp = Model.Cliente?.Telefono ?? Model.ClienteTelefonoContacto;
+    var conceptos = Model.FacturaDetalles.Select(d => d.Servicio?.Nombre ?? d.Producto?.Nombre);
     var mensajeWhatsApp = $"¡Hola {nombreCliente}! Aquí tu factura de Elara 💅\n" +
         $"N° {Model.NumeroFactura} | {Model.FechaEmision:dd/MM/yyyy}\n" +
-        $"Servicios: {string.Join(", ", Model.FacturaDetalles.Select(d => d.Servicio?.Nombre))}\n" +
+        $"Detalle: {string.Join(", ", conceptos)}\n" +
         $"Total: RD$ {Model.Total.ToString("0.00")}\n" +
         "¡Gracias por tu visita! 💅";
     var whatsappUrl = WhatsAppLinkHelper.ConstruirLink(telefonoWhatsApp, mensajeWhatsApp);
+    var todasLasDevoluciones = Model.FacturaDetalles.SelectMany(d => d.Devoluciones).OrderByDescending(d => d.Fecha).ToList();
 }
 
 <div class="mb-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
@@ -67,26 +69,109 @@
                 <table class="table table-sm mb-0">
                     <thead>
                         <tr>
-                            <th>Servicio</th>
+                            <th>Concepto</th>
                             <th>Especialista</th>
                             <th class="text-end">Cant.</th>
                             <th class="text-end">Subtotal</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var detalle in Model.FacturaDetalles)
                         {
+                            var yaDevuelto = detalle.Devoluciones.Sum(d => d.Cantidad);
+                            var disponibleParaDevolver = detalle.Cantidad - yaDevuelto;
                             <tr>
-                                <td>@detalle.Servicio?.Nombre</td>
-                                <td>@detalle.Empleado?.NombreCompleto</td>
+                                <td>
+                                    @(detalle.Servicio?.Nombre ?? detalle.Producto?.Nombre)
+                                    @if (detalle.ProductoId.HasValue)
+                                    {
+                                        <span class="badge bg-secondary ms-1">Producto</span>
+                                    }
+                                    @if (yaDevuelto > 0)
+                                    {
+                                        <div class="text-elara-muted small">Devuelto: @yaDevuelto de @detalle.Cantidad</div>
+                                    }
+                                </td>
+                                <td>@(detalle.Empleado?.NombreCompleto ?? "—")</td>
                                 <td class="text-end">@detalle.Cantidad</td>
                                 <td class="text-end">$@detalle.Subtotal.ToString("0.00")</td>
+                                <td class="text-end">
+                                    @if (detalle.ProductoId.HasValue && disponibleParaDevolver > 0)
+                                    {
+                                        <a asp-controller="Devoluciones" asp-action="Crear" asp-route-facturaDetalleId="@detalle.Id" class="btn btn-sm btn-outline-elara">
+                                            <i class="bi bi-arrow-return-left"></i> Devolver
+                                        </a>
+                                    }
+                                </td>
                             </tr>
                         }
                     </tbody>
                 </table>
             </div>
         </div>
+
+        @if (Model.MetodoPago == MetodoPago.Transferencia)
+        {
+            <div class="card card-elara mt-4">
+                <div class="card-body">
+                    <h5 class="card-title font-heading mb-3">Comprobante de transferencia</h5>
+                    @if (!string.IsNullOrEmpty(Model.ComprobanteTransferenciaUrl))
+                    {
+                        <a href="@Model.ComprobanteTransferenciaUrl" target="_blank">
+                            <img src="@Model.ComprobanteTransferenciaUrl" alt="Comprobante de transferencia" class="img-fluid rounded" style="max-height: 240px;" />
+                        </a>
+                    }
+                    else
+                    {
+                        <p class="text-elara-muted small">No se ha adjuntado un comprobante todavía.</p>
+                        <form asp-controller="Facturas" asp-action="SubirComprobante" method="post" enctype="multipart/form-data" class="d-flex gap-2">
+                            <input type="hidden" name="facturaId" value="@Model.Id" />
+                            <input type="file" name="archivo" accept="image/*" class="form-control" required />
+                            <button type="submit" class="btn btn-elara text-nowrap">
+                                <i class="bi bi-upload me-1"></i> Subir
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+
+        @if (todasLasDevoluciones.Any())
+        {
+            <div class="card card-elara mt-4">
+                <div class="card-body">
+                    <h5 class="card-title font-heading mb-3">Devoluciones de esta factura</h5>
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>N°</th>
+                                <th>Fecha</th>
+                                <th class="text-end">Cantidad</th>
+                                <th class="text-end">Monto</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var devolucion in todasLasDevoluciones)
+                            {
+                                <tr>
+                                    <td>@devolucion.NumeroDevolucion</td>
+                                    <td>@devolucion.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td class="text-end">@devolucion.Cantidad</td>
+                                    <td class="text-end">$@devolucion.MontoReembolsado.ToString("0.00")</td>
+                                    <td class="text-end">
+                                        <a asp-controller="Devoluciones" asp-action="Imprimir" asp-route-id="@devolucion.Id" target="_blank" class="btn btn-sm btn-outline-elara">
+                                            <i class="bi bi-printer"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
     </div>
 
     <div class="col-12 col-md-6">

@@ -17,6 +17,10 @@ public class Producto
     public UnidadMedida UnidadMedida { get; set; }
 
     public decimal PrecioCosto { get; set; }
+
+    // Precio al público cuando se vende directo (Facturas/VentaRapida).
+    public decimal PrecioVenta { get; set; }
+
     public string? Proveedor { get; set; }
     public DateTime? FechaUltimaCompra { get; set; }
 

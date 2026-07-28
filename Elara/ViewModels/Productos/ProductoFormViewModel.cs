@@ -37,6 +37,10 @@ public class ProductoFormViewModel
     [Display(Name = "Precio de costo")]
     public decimal PrecioCosto { get; set; }
 
+    [Range(0.01, 1000000, ErrorMessage = "El precio de venta debe ser mayor a 0.")]
+    [Display(Name = "Precio de venta")]
+    public decimal PrecioVenta { get; set; }
+
     [StringLength(150)]
     [Display(Name = "Proveedor")]
     public string? Proveedor { get; set; }
