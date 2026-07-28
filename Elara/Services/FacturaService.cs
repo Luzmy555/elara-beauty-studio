@@ -101,6 +101,14 @@ public class FacturaService : IFacturaService
         var total = subtotal - model.Descuento;
         var comision = Math.Round(total * (cita.Empleado?.ComisionPorcentaje ?? 0m) / 100m, 2);
 
+        // La devuelta solo existe en efectivo; en tarjeta/transferencia se
+        // ignora aunque el formulario traiga algo cargado.
+        var montoRecibido = model.MetodoPago == MetodoPago.Efectivo ? model.MontoRecibido : null;
+        if (montoRecibido.HasValue && montoRecibido.Value < total)
+        {
+            return (false, "El monto recibido es menor al total a cobrar.", null);
+        }
+
         var factura = new Factura
         {
             CitaId = cita.Id,
@@ -111,6 +119,7 @@ public class FacturaService : IFacturaService
             Total = total,
             MetodoPago = model.MetodoPago,
             Estado = model.Estado,
+            MontoRecibido = montoRecibido,
             FechaEmision = DateTime.Now,
             FacturaDetalles = new List<FacturaDetalle>
             {

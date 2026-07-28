@@ -30,6 +30,12 @@ public class FacturaFormViewModel : IValidatableObject
     [Display(Name = "Estado")]
     public EstadoFactura Estado { get; set; } = EstadoFactura.Pagada;
 
+    // Solo tiene sentido con MetodoPago.Efectivo; con tarjeta/transferencia se
+    // ignora aunque venga cargado (no hay "devuelta" en esos métodos).
+    [Range(0, 10000000, ErrorMessage = "El monto recibido no puede ser negativo.")]
+    [Display(Name = "Monto recibido")]
+    public decimal? MontoRecibido { get; set; }
+
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (Descuento > 0 && string.IsNullOrWhiteSpace(DescuentoJustificacion))
@@ -44,6 +50,17 @@ public class FacturaFormViewModel : IValidatableObject
             yield return new ValidationResult(
                 "El descuento no puede ser mayor al subtotal.",
                 new[] { nameof(Descuento) });
+        }
+
+        if (MetodoPago == MetodoPago.Efectivo && MontoRecibido.HasValue)
+        {
+            var total = Subtotal - Descuento;
+            if (MontoRecibido.Value < total)
+            {
+                yield return new ValidationResult(
+                    "El monto recibido es menor al total a cobrar.",
+                    new[] { nameof(MontoRecibido) });
+            }
         }
     }
 }
