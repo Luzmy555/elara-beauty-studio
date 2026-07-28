@@ -5,7 +5,7 @@
 
     var nombreCliente = Model.Cliente?.NombreCompleto ?? "Cliente sin registrar";
     var telefonoWhatsApp = Model.Cliente?.Telefono ?? Model.ClienteTelefonoContacto;
-    var mensajeWhatsApp = $"¡Hola {nombreCliente}! Aquí tu factura de Elara Salón de Uñas 💅\n" +
+    var mensajeWhatsApp = $"¡Hola {nombreCliente}! Aquí tu factura de Elara 💅\n" +
         $"N° {Model.NumeroFactura} | {Model.FechaEmision:dd/MM/yyyy}\n" +
         $"Servicios: {string.Join(", ", Model.FacturaDetalles.Select(d => d.Servicio?.Nombre))}\n" +
         $"Total: RD$ {Model.Total.ToString("0.00")}\n" +

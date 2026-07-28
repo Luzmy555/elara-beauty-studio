@@ -9,103 +9,137 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
+using Serilog;
 
-var builder = WebApplication.CreateBuilder(args);
+// Logger de arranque: captura errores de configuración que ocurran antes de
+// que el logger definitivo (leído de appsettings, más abajo) quede listo.
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-// Toda acción requiere autenticación por defecto; las páginas públicas
-// (login, recuperación de contraseña) se marcan con [AllowAnonymous].
-// MustChangePasswordFilter obliga a cambiar la contraseña temporal (ver
-// módulo Empleados) antes de dejar entrar a cualquier otra pantalla.
-builder.Services.AddControllersWithViews(options =>
+try
 {
-    var policy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .Build();
-    options.Filters.Add(new AuthorizeFilter(policy));
-    options.Filters.Add<MustChangePasswordFilter>();
-});
+    Log.Information("Iniciando Elara...");
 
-// Configuración de MariaDB/MySQL con Pomelo.EntityFrameworkCore.MySql
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'DefaultConnection'.");
+    var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+    builder.Host.UseSerilog((context, services, configuration) => configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext());
 
-// ASP.NET Core Identity con roles (Administrador, Recepcionista, Especialista)
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-{
-    options.Password.RequiredLength = 8;
-    options.Password.RequireNonAlphanumeric = true;
-    options.Password.RequireUppercase = true;
-    options.Password.RequireLowercase = true;
-    options.Password.RequireDigit = true;
-    options.User.RequireUniqueEmail = true;
-    options.SignIn.RequireConfirmedAccount = false; // no hay envío real de correo por ahora
-    options.Lockout.MaxFailedAccessAttempts = 5;
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
-})
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
+    // Toda acción requiere autenticación por defecto; las páginas públicas
+    // (login, recuperación de contraseña) se marcan con [AllowAnonymous].
+    // MustChangePasswordFilter obliga a cambiar la contraseña temporal (ver
+    // módulo Empleados) antes de dejar entrar a cualquier otra pantalla.
+    builder.Services.AddControllersWithViews(options =>
+    {
+        var policy = new AuthorizationPolicyBuilder()
+            .RequireAuthenticatedUser()
+            .Build();
+        options.Filters.Add(new AuthorizeFilter(policy));
+        options.Filters.Add<MustChangePasswordFilter>();
+    });
 
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.LoginPath = "/Account/Login";
-    options.LogoutPath = "/Account/Logout";
-    options.AccessDeniedPath = "/Account/AccessDenied";
-    options.ExpireTimeSpan = TimeSpan.FromHours(8);
-    options.SlidingExpiration = true;
-});
+    // Configuración de MariaDB/MySQL con Pomelo.EntityFrameworkCore.MySql
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+        ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'DefaultConnection'.");
 
-// Repositories y Services de cada módulo
-builder.Services.AddScoped<IFotoUploadService, FotoUploadService>();
-builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
-builder.Services.AddScoped<IClienteService, ClienteService>();
-builder.Services.AddScoped<IEmpleadoRepository, EmpleadoRepository>();
-builder.Services.AddScoped<IEmpleadoService, EmpleadoService>();
-builder.Services.AddScoped<IServicioRepository, ServicioRepository>();
-builder.Services.AddScoped<IServicioService, ServicioService>();
-builder.Services.AddScoped<ICitaRepository, CitaRepository>();
-builder.Services.AddScoped<IDisponibilidadService, DisponibilidadService>();
-builder.Services.AddScoped<IFacturaRepository, FacturaRepository>();
-builder.Services.AddScoped<ICitaService, CitaService>();
-builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
-builder.Services.AddScoped<IMovimientoInventarioRepository, MovimientoInventarioRepository>();
-builder.Services.AddScoped<IProductoService, ProductoService>();
-builder.Services.AddScoped<IFacturaService, FacturaService>();
-builder.Services.AddScoped<IReporteService, ReporteService>();
-builder.Services.AddScoped<ICategoriaServicioRepository, CategoriaServicioRepository>();
-builder.Services.AddScoped<ICategoriaServicioService, CategoriaServicioService>();
-builder.Services.AddScoped<IConfiguracionNegocioRepository, ConfiguracionNegocioRepository>();
-builder.Services.AddScoped<IConfiguracionNegocioService, ConfiguracionNegocioService>();
-builder.Services.AddScoped<IThemeService, ThemeService>();
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
-var app = builder.Build();
+    // ASP.NET Core Identity con roles (Administrador, Recepcionista, Especialista)
+    builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+    {
+        options.Password.RequiredLength = 8;
+        options.Password.RequireNonAlphanumeric = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireDigit = true;
+        options.User.RequireUniqueEmail = true;
+        options.SignIn.RequireConfirmedAccount = false; // no hay envío real de correo por ahora
+        options.Lockout.MaxFailedAccessAttempts = 5;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
+    })
+        .AddEntityFrameworkStores<ApplicationDbContext>()
+        .AddDefaultTokenProviders();
 
-// Roles y usuario Administrador por defecto (admin@salonunas.com)
-using (var scope = app.Services.CreateScope())
-{
-    await SeedData.InitializeAsync(scope.ServiceProvider);
+    builder.Services.ConfigureApplicationCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Logout";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+        options.SlidingExpiration = true;
+    });
+
+    // Repositories y Services de cada módulo
+    builder.Services.AddScoped<IFotoUploadService, FotoUploadService>();
+    builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
+    builder.Services.AddScoped<IClienteService, ClienteService>();
+    builder.Services.AddScoped<IEmpleadoRepository, EmpleadoRepository>();
+    builder.Services.AddScoped<IEmpleadoService, EmpleadoService>();
+    builder.Services.AddScoped<IServicioRepository, ServicioRepository>();
+    builder.Services.AddScoped<IServicioService, ServicioService>();
+    builder.Services.AddScoped<ICitaRepository, CitaRepository>();
+    builder.Services.AddScoped<IDisponibilidadService, DisponibilidadService>();
+    builder.Services.AddScoped<IFacturaRepository, FacturaRepository>();
+    builder.Services.AddScoped<ICitaService, CitaService>();
+    builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
+    builder.Services.AddScoped<IMovimientoInventarioRepository, MovimientoInventarioRepository>();
+    builder.Services.AddScoped<IProductoService, ProductoService>();
+    builder.Services.AddScoped<IFacturaService, FacturaService>();
+    builder.Services.AddScoped<IReporteService, ReporteService>();
+    builder.Services.AddScoped<ICategoriaServicioRepository, CategoriaServicioRepository>();
+    builder.Services.AddScoped<ICategoriaServicioService, CategoriaServicioService>();
+    builder.Services.AddScoped<IConfiguracionNegocioRepository, ConfiguracionNegocioRepository>();
+    builder.Services.AddScoped<IConfiguracionNegocioService, ConfiguracionNegocioService>();
+    builder.Services.AddScoped<IThemeService, ThemeService>();
+
+    var app = builder.Build();
+
+    // Roles y usuario Administrador por defecto (admin@salonunas.com)
+    using (var scope = app.Services.CreateScope())
+    {
+        await SeedData.InitializeAsync(scope.ServiceProvider);
+    }
+
+    // Configure the HTTP request pipeline.
+    if (!app.Environment.IsDevelopment())
+    {
+        app.UseExceptionHandler("/Home/Error");
+        // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+        app.UseHsts();
+    }
+
+    // Registra cada request (método, ruta, status, duración) como un evento
+    // estructurado; sale por los mismos sinks configurados en appsettings
+    // (consola + archivo en logs/).
+    app.UseSerilogRequestLogging();
+
+    app.UseHttpsRedirection();
+    app.UseStaticFiles();
+
+    app.UseRouting();
+
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+    app.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}");
+
+    app.Run();
 }
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+catch (Exception ex) when (ex is not HostAbortedException)
 {
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    // HostAbortedException la lanza el propio host durante `dotnet ef ...`
+    // (crea y descarta el WebApplicationBuilder para leer el DbContext) y no
+    // es un fallo real; cualquier otra excepción en el arranque sí se registra.
+    Log.Fatal(ex, "Elara terminó inesperadamente durante el arranque.");
 }
-
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-
-app.UseRouting();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-
-app.Run();
+finally
+{
+    Log.CloseAndFlush();
+}
