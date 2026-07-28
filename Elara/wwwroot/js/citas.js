@@ -132,6 +132,17 @@
             })
             .then(function (html) {
                 if (html == null) { return; }
+
+                // Si algo entre el navegador y el servidor (un túnel como
+                // ngrok, un proxy, un portal de wifi) devuelve una página
+                // distinta a la esperada, esto evita abrir el modal con
+                // contenido irreconocible: se valida que el formulario real
+                // venga incluido antes de mostrarlo.
+                if (html.indexOf('id="citaForm"') === -1) {
+                    mostrarToast("La respuesta del servidor no fue la esperada. Recarga la página e intenta de nuevo.", "error");
+                    return;
+                }
+
                 modalBody.innerHTML = html;
                 inicializarFormulario();
                 modal.show();
