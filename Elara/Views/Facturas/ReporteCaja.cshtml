@@ -58,6 +58,15 @@
     </div>
 </div>
 
+<div class="row g-3 mb-4">
+    <div class="col-auto text-elara-muted">
+        <i class="bi bi-calendar2-check me-1"></i> Desde cita: <strong>@Model.CantidadDesdeCita</strong>
+    </div>
+    <div class="col-auto text-elara-muted">
+        <i class="bi bi-lightning-charge me-1"></i> Venta rápida: <strong>@Model.CantidadVentaRapida</strong>
+    </div>
+</div>
+
 @if (Model.TotalPendiente > 0)
 {
     <div class="alert badge-elara-pending mb-4">
@@ -72,8 +81,9 @@
             <thead>
                 <tr>
                     <th>Factura</th>
+                    <th>Origen</th>
                     <th>Cliente</th>
-                    <th>Especialista</th>
+                    <th>Especialistas</th>
                     <th>Método</th>
                     <th>Estado</th>
                     <th class="text-end">Total</th>
@@ -84,7 +94,7 @@
                 @if (!Model.Facturas.Any())
                 {
                     <tr>
-                        <td colspan="7" class="text-center text-elara-muted py-5">No hay facturas en esta fecha.</td>
+                        <td colspan="8" class="text-center text-elara-muted py-5">No hay facturas en esta fecha.</td>
                     </tr>
                 }
                 else
@@ -92,9 +102,12 @@
                     foreach (var factura in Model.Facturas)
                     {
                         <tr>
-                            <td>#@factura.Id.ToString("D6")</td>
-                            <td>@factura.Cliente?.NombreCompleto</td>
-                            <td>@factura.Empleado?.NombreCompleto</td>
+                            <td>@factura.NumeroFactura</td>
+                            <td>
+                                <span class="badge bg-secondary">@(factura.CitaId.HasValue ? "Cita" : "Rápida")</span>
+                            </td>
+                            <td>@(factura.Cliente?.NombreCompleto ?? "Sin registrar")</td>
+                            <td>@string.Join(", ", factura.FacturaDetalles.Select(d => d.Empleado?.NombreCompleto).Distinct())</td>
                             <td>@factura.MetodoPago</td>
                             <td>
                                 <span class="badge @(factura.Estado == EstadoFactura.Pagada ? "badge-elara-success" : "badge-elara-pending")">

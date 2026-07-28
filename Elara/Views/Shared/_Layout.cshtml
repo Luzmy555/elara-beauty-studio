@@ -121,6 +121,9 @@
                     <a class="nav-link @(currentController == "Facturas" && currentAction != "ReporteComisiones" ? "active" : "")" asp-controller="Facturas" asp-action="ReporteCaja">
                         <i class="bi bi-receipt"></i> <span>Facturación</span>
                     </a>
+                    <a class="nav-link @(currentController == "Facturas" && currentAction == "VentaRapida" ? "active" : "")" asp-controller="Facturas" asp-action="VentaRapida">
+                        <i class="bi bi-lightning-charge"></i> <span>Nueva Factura</span>
+                    </a>
                 }
 
                 @if (isEspecialista)

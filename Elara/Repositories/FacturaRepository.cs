@@ -23,8 +23,8 @@ public class FacturaRepository : IFacturaRepository
         }
 
         return await _context.Facturas
-            .Where(f => ids.Contains(f.CitaId))
-            .ToDictionaryAsync(f => f.CitaId, f => f.Id);
+            .Where(f => f.CitaId.HasValue && ids.Contains(f.CitaId.Value))
+            .ToDictionaryAsync(f => f.CitaId!.Value, f => f.Id);
     }
 
     public Task<Factura?> GetByCitaIdAsync(int citaId)
@@ -36,8 +36,8 @@ public class FacturaRepository : IFacturaRepository
     {
         return _context.Facturas
             .Include(f => f.Cliente)
-            .Include(f => f.Empleado)
-            .Include(f => f.Cita).ThenInclude(c => c!.Servicio)
+            .Include(f => f.FacturaDetalles).ThenInclude(d => d.Servicio)
+            .Include(f => f.FacturaDetalles).ThenInclude(d => d.Empleado)
             .FirstOrDefaultAsync(f => f.Id == id);
     }
 
@@ -45,8 +45,8 @@ public class FacturaRepository : IFacturaRepository
     {
         return _context.Facturas
             .Include(f => f.Cliente)
-            .Include(f => f.Empleado)
-            .Include(f => f.Cita).ThenInclude(c => c!.Servicio)
+            .Include(f => f.FacturaDetalles).ThenInclude(d => d.Servicio)
+            .Include(f => f.FacturaDetalles).ThenInclude(d => d.Empleado)
             .Where(f => f.FechaEmision >= desde && f.FechaEmision < hasta)
             .OrderByDescending(f => f.FechaEmision)
             .ToListAsync();

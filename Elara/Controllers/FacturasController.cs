@@ -56,6 +56,42 @@ public class FacturasController : Controller
     }
 
     [HttpGet]
+    public async Task<IActionResult> VentaRapida()
+    {
+        var model = await _facturaService.ConstruirVentaRapidaFormularioAsync();
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> VentaRapida(VentaRapidaViewModel model)
+    {
+        // El teléfono de contacto solo aplica a walk-ins; si se eligió un
+        // cliente registrado, se ignora aunque el campo venga con algo escrito.
+        if (model.ClienteId.HasValue)
+        {
+            model.ClienteTelefonoContacto = null;
+        }
+
+        if (!ModelState.IsValid)
+        {
+            await RecargarCatalogosAsync(model);
+            return View(model);
+        }
+
+        var (success, error, facturaId) = await _facturaService.CrearVentaRapidaAsync(model);
+        if (!success)
+        {
+            ModelState.AddModelError(string.Empty, error!);
+            await RecargarCatalogosAsync(model);
+            return View(model);
+        }
+
+        TempData["SuccessMessage"] = "Factura generada correctamente.";
+        return RedirectToAction(nameof(Details), new { id = facturaId });
+    }
+
+    [HttpGet]
     public async Task<IActionResult> Details(int id)
     {
         var factura = await _facturaService.ObtenerPorIdAsync(id);
@@ -113,5 +149,13 @@ public class FacturasController : Controller
         model.EmpleadoNombre = formulario.EmpleadoNombre;
         model.ServicioNombre = formulario.ServicioNombre;
         model.Subtotal = formulario.Subtotal;
+    }
+
+    private async Task RecargarCatalogosAsync(VentaRapidaViewModel model)
+    {
+        var formulario = await _facturaService.ConstruirVentaRapidaFormularioAsync();
+        model.ClientesDisponibles = formulario.ClientesDisponibles;
+        model.EmpleadosDisponibles = formulario.EmpleadosDisponibles;
+        model.ServiciosDisponibles = formulario.ServiciosDisponibles;
     }
 }

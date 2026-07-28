@@ -1,7 +1,9 @@
 @model Factura
 @{
-    ViewData["Title"] = "Factura #" + Model.Id;
+    ViewData["Title"] = "Factura " + Model.NumeroFactura;
     Layout = "_PrintLayout";
+
+    var nombreCliente = Model.Cliente?.NombreCompleto ?? "Cliente sin registrar";
 }
 
 <div class="elara-invoice">
@@ -20,7 +22,7 @@
             <p class="text-elara-muted mb-0">Salón de uñas de lujo</p>
         </div>
         <div class="text-end">
-            <h2 class="h4 mb-1">Factura #@Model.Id.ToString("D6")</h2>
+            <h2 class="h4 mb-1">Factura @Model.NumeroFactura</h2>
             <p class="mb-1">@Model.FechaEmision.ToString("dd/MM/yyyy HH:mm")</p>
             <span class="badge @(Model.Estado == EstadoFactura.Pagada ? "badge-elara-success" : "badge-elara-pending")">
                 @Model.Estado
@@ -34,13 +36,8 @@
         <div class="row">
             <div class="col-6">
                 <h6 class="text-elara-muted text-uppercase small">Cliente</h6>
-                <p class="mb-0 fw-semibold">@Model.Cliente?.NombreCompleto</p>
-                <p class="mb-0">@Model.Cliente?.Telefono</p>
-                <p class="mb-0">@Model.Cliente?.Email</p>
-            </div>
-            <div class="col-6 text-end">
-                <h6 class="text-elara-muted text-uppercase small">Atendido por</h6>
-                <p class="mb-0 fw-semibold">@Model.Empleado?.NombreCompleto</p>
+                <p class="mb-0 fw-semibold">@nombreCliente</p>
+                <p class="mb-0">@(Model.Cliente?.Telefono ?? Model.ClienteTelefonoContacto)</p>
             </div>
         </div>
     </section>
@@ -50,14 +47,21 @@
             <thead>
                 <tr>
                     <th>Servicio</th>
+                    <th>Especialista</th>
+                    <th class="text-end">Cant.</th>
                     <th class="text-end">Precio</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>@Model.Cita?.Servicio?.Nombre</td>
-                    <td class="text-end">$@Model.Subtotal.ToString("0.00")</td>
-                </tr>
+                @foreach (var detalle in Model.FacturaDetalles)
+                {
+                    <tr>
+                        <td>@detalle.Servicio?.Nombre</td>
+                        <td>@detalle.Empleado?.NombreCompleto</td>
+                        <td class="text-end">@detalle.Cantidad</td>
+                        <td class="text-end">$@detalle.Subtotal.ToString("0.00")</td>
+                    </tr>
+                }
             </tbody>
         </table>
 

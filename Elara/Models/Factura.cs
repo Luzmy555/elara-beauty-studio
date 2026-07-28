@@ -4,14 +4,21 @@ public class Factura
 {
     public int Id { get; set; }
 
-    public int CitaId { get; set; }
+    // Correlativo mostrado al cliente (ej. "ELR-0001"). Se fija recién
+    // después del insert, cuando ya se conoce el Id autoincremental.
+    public string NumeroFactura { get; set; } = string.Empty;
+
+    // Null cuando la factura viene de una venta rápida (walk-in) sin cita previa.
+    public int? CitaId { get; set; }
     public Cita? Cita { get; set; }
 
-    public int ClienteId { get; set; }
+    // Null cuando el cliente es "sin registrar" (walk-in que no quiso darse de alta).
+    public int? ClienteId { get; set; }
     public Cliente? Cliente { get; set; }
 
-    public int EmpleadoId { get; set; }
-    public Empleado? Empleado { get; set; }
+    // Solo se usa cuando ClienteId es null: teléfono capturado a mano para
+    // poder enviarle el link de WhatsApp sin crear un registro de Cliente.
+    public string? ClienteTelefonoContacto { get; set; }
 
     public decimal Subtotal { get; set; }
     public decimal Descuento { get; set; }
@@ -23,8 +30,7 @@ public class Factura
 
     public DateTime FechaEmision { get; set; } = DateTime.Now;
 
-    // Comisión calculada al emitir la factura con el % vigente en ese momento
-    // en el perfil del empleado (Empleado.ComisionPorcentaje). No se recalcula
-    // retroactivamente si el % del empleado cambia después.
-    public decimal ComisionEmpleado { get; set; }
+    // El empleado y la comisión viven por línea (FacturaDetalle), no aquí:
+    // una misma factura puede tener varios especialistas distintos.
+    public ICollection<FacturaDetalle> FacturaDetalles { get; set; } = new List<FacturaDetalle>();
 }

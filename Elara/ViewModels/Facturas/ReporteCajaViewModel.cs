@@ -11,5 +11,7 @@ public class ReporteCajaViewModel
     public decimal TotalGeneral => TotalEfectivo + TotalTarjeta + TotalTransferencia;
     public decimal TotalPendiente { get; set; }
     public int CantidadFacturas { get; set; }
+    public int CantidadDesdeCita { get; set; }
+    public int CantidadVentaRapida { get; set; }
     public List<Factura> Facturas { get; set; } = new();
 }

@@ -22,6 +22,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Producto> Productos => Set<Producto>();
     public DbSet<MovimientoInventario> MovimientosInventario => Set<MovimientoInventario>();
     public DbSet<Factura> Facturas => Set<Factura>();
+    public DbSet<FacturaDetalle> FacturaDetalles => Set<FacturaDetalle>();
     public DbSet<ConfiguracionNegocio> ConfiguracionNegocio => Set<ConfiguracionNegocio>();
     public DbSet<HorarioNegocio> HorariosNegocio => Set<HorarioNegocio>();
 
@@ -131,7 +132,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(f => f.Subtotal).HasPrecision(10, 2);
             entity.Property(f => f.Descuento).HasPrecision(10, 2);
             entity.Property(f => f.Total).HasPrecision(10, 2);
-            entity.Property(f => f.ComisionEmpleado).HasPrecision(10, 2);
+
+            // Único por construcción (se deriva 1 a 1 del Id autoincremental
+            // justo después del insert), no hace falta un índice único aparte.
+            entity.Property(f => f.NumeroFactura).HasMaxLength(20);
 
             entity.HasIndex(f => f.CitaId).IsUnique();
 
@@ -144,10 +148,27 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .WithMany()
                 .HasForeignKey(f => f.ClienteId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
 
-            entity.HasOne(f => f.Empleado)
+        modelBuilder.Entity<FacturaDetalle>(entity =>
+        {
+            entity.Property(d => d.PrecioUnitario).HasPrecision(10, 2);
+            entity.Property(d => d.Subtotal).HasPrecision(10, 2);
+            entity.Property(d => d.ComisionEmpleado).HasPrecision(10, 2);
+
+            entity.HasOne(d => d.Factura)
+                .WithMany(f => f.FacturaDetalles)
+                .HasForeignKey(d => d.FacturaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(d => d.Servicio)
                 .WithMany()
-                .HasForeignKey(f => f.EmpleadoId)
+                .HasForeignKey(d => d.ServicioId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(d => d.Empleado)
+                .WithMany()
+                .HasForeignKey(d => d.EmpleadoId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
