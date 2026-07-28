@@ -38,7 +38,9 @@
 
         var montoRecibido = parseFloat(montoRecibidoInput.value) || 0;
         var devuelta = montoRecibido - total;
-        devueltaPreview.textContent = "$" + Math.abs(devuelta).toFixed(2);
+        // Negativo (con "-") cuando el monto recibido no alcanza a cubrir el
+        // total, para que salte a la vista que falta cobrar esa diferencia.
+        devueltaPreview.textContent = (devuelta < 0 ? "-$" : "$") + Math.abs(devuelta).toFixed(2);
         devueltaWrapper.classList.toggle("elara-caja-devuelta-insuficiente", devuelta < 0);
     }
 
