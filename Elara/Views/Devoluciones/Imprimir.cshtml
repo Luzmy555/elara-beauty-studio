@@ -35,22 +35,24 @@
     <hr class="elara-divider" />
 
     <section class="elara-invoice-section">
-        <table class="table elara-invoice-table">
-            <thead>
-                <tr>
-                    <th>Producto</th>
-                    <th class="text-end">Cantidad devuelta</th>
-                    <th class="text-end">Monto reembolsado</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>@Model.FacturaDetalle?.Producto?.Nombre</td>
-                    <td class="text-end">@Model.Cantidad</td>
-                    <td class="text-end">$@Model.MontoReembolsado.ToString("0.00")</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table elara-invoice-table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th class="text-end">Cantidad devuelta</th>
+                        <th class="text-end">Monto reembolsado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@Model.FacturaDetalle?.Producto?.Nombre</td>
+                        <td class="text-end">@Model.Cantidad</td>
+                        <td class="text-end">$@Model.MontoReembolsado.ToString("0.00")</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
         <div class="elara-invoice-totales">
             <div class="d-flex justify-content-between elara-invoice-total-final">

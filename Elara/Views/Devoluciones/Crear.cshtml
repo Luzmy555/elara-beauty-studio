@@ -46,12 +46,12 @@
                 <input type="hidden" asp-for="PrecioUnitario" />
 
                 <div class="row">
-                    <div class="col-md-6 mb-3">
+                    <div class="col-12 col-md-6 mb-3">
                         <label asp-for="Cantidad" class="form-label"></label>
                         <input asp-for="Cantidad" type="number" min="1" max="@Model.CantidadDisponible" class="form-control" />
                         <span asp-validation-for="Cantidad" class="text-elara-accent small"></span>
                     </div>
-                    <div class="col-md-6 mb-3">
+                    <div class="col-12 col-md-6 mb-3">
                         <label asp-for="MetodoReembolso" class="form-label"></label>
                         <select asp-for="MetodoReembolso" class="form-select" asp-items="Html.GetEnumSelectList<MetodoPago>()"></select>
                     </div>

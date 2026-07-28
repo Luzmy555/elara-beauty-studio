@@ -1,12 +1,12 @@
 @model ProductoFormViewModel
 
 <div class="row g-3">
-    <div class="col-md-6 mb-3">
+    <div class="col-12 col-md-6 mb-3">
         <label asp-for="Nombre" class="form-label"></label>
         <input asp-for="Nombre" class="form-control" autofocus placeholder="Ej: Esmalte OPI Rojo Pasión" />
         <span asp-validation-for="Nombre" class="text-elara-accent small"></span>
     </div>
-    <div class="col-md-6 mb-3">
+    <div class="col-12 col-md-6 mb-3">
         <label asp-for="Marca" class="form-label"></label>
         <input asp-for="Marca" class="form-control" />
         <span asp-validation-for="Marca" class="text-elara-accent small"></span>
@@ -14,15 +14,15 @@
 </div>
 
 <div class="row g-3">
-    <div class="col-md-4 mb-3">
+    <div class="col-12 col-md-4 mb-3">
         <label asp-for="Categoria" class="form-label"></label>
         <select asp-for="Categoria" class="form-select" asp-items="Html.GetEnumSelectList<CategoriaProducto>()"></select>
     </div>
-    <div class="col-md-4 mb-3">
+    <div class="col-12 col-md-4 mb-3">
         <label asp-for="UnidadMedida" class="form-label"></label>
         <select asp-for="UnidadMedida" class="form-select" asp-items="Html.GetEnumSelectList<UnidadMedida>()"></select>
     </div>
-    <div class="col-md-4 mb-3">
+    <div class="col-12 col-md-4 mb-3">
         <label asp-for="PrecioCosto" class="form-label"></label>
         <div class="input-group">
             <span class="input-group-text">$</span>
@@ -30,7 +30,7 @@
         </div>
         <span asp-validation-for="PrecioCosto" class="text-elara-accent small"></span>
     </div>
-    <div class="col-md-4 mb-3">
+    <div class="col-12 col-md-4 mb-3">
         <label asp-for="PrecioVenta" class="form-label"></label>
         <div class="input-group">
             <span class="input-group-text">$</span>
@@ -42,7 +42,7 @@
 </div>
 
 <div class="row g-3">
-    <div class="col-md-4 mb-3">
+    <div class="col-12 col-md-4 mb-3">
         @if (Model.EsEdicion)
         {
             <label class="form-label">Cantidad actual</label>
@@ -56,13 +56,13 @@
             <span asp-validation-for="CantidadActual" class="text-elara-accent small"></span>
         }
     </div>
-    <div class="col-md-4 mb-3">
+    <div class="col-12 col-md-4 mb-3">
         <label asp-for="CantidadMinima" class="form-label"></label>
         <input asp-for="CantidadMinima" type="number" min="0.01" step="0.01" class="form-control" />
         <span asp-validation-for="CantidadMinima" class="text-elara-accent small"></span>
         <div class="form-text">Dispara la alerta de reabastecimiento.</div>
     </div>
-    <div class="col-md-4 mb-3">
+    <div class="col-12 col-md-4 mb-3">
         <label asp-for="Proveedor" class="form-label"></label>
         <input asp-for="Proveedor" class="form-control" />
     </div>

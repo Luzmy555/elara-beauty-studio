@@ -43,27 +43,29 @@
     </section>
 
     <section class="elara-invoice-section">
-        <table class="table elara-invoice-table">
-            <thead>
-                <tr>
-                    <th>Servicio</th>
-                    <th>Especialista</th>
-                    <th class="text-end">Cant.</th>
-                    <th class="text-end">Precio</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var detalle in Model.FacturaDetalles)
-                {
+        <div class="table-responsive">
+            <table class="table elara-invoice-table">
+                <thead>
                     <tr>
-                        <td>@detalle.Servicio?.Nombre</td>
-                        <td>@detalle.Empleado?.NombreCompleto</td>
-                        <td class="text-end">@detalle.Cantidad</td>
-                        <td class="text-end">$@detalle.Subtotal.ToString("0.00")</td>
+                        <th>Concepto</th>
+                        <th>Especialista</th>
+                        <th class="text-end">Cant.</th>
+                        <th class="text-end">Precio</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var detalle in Model.FacturaDetalles)
+                    {
+                        <tr>
+                            <td>@(detalle.Servicio?.Nombre ?? detalle.Producto?.Nombre)</td>
+                            <td>@(detalle.Empleado?.NombreCompleto ?? "—")</td>
+                            <td class="text-end">@detalle.Cantidad</td>
+                            <td class="text-end">$@detalle.Subtotal.ToString("0.00")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
 
         <div class="elara-invoice-totales">
             <div class="d-flex justify-content-between">

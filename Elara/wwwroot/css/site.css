@@ -187,12 +187,25 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Red de seguridad: nada debería poder abrir un scroll horizontal de toda
+   la página en celulares. Los contenedores que sí necesitan desplazarse de
+   lado (tablas, el calendario) lo hacen dentro de su propio wrapper. */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 body {
   font-family: var(--font-body);
   background-color: var(--elara-bg);
   color: var(--elara-text);
   min-height: 100vh;
   margin: 0;
+}
+
+img, svg {
+  max-width: 100%;
+  height: auto;
 }
 
 h1, h2, h3, h4, h5, h6,
@@ -380,6 +393,23 @@ small, .text-muted {
   color: var(--elara-accent-hover);
 }
 
+/* Nombres de salón largos no deben empujar los botones de la barra fuera
+   de pantalla en celulares: se recortan con "..." en vez de desbordar. */
+@media (max-width: 575.98px) {
+  .navbar-brand.elara-logo {
+    font-size: 1.15rem;
+    max-width: 42vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+  }
+
+  .navbar-brand.elara-logo img {
+    display: none;
+  }
+}
+
 @keyframes elaraLogoAppear {
   0% {
     opacity: 0;
@@ -532,6 +562,16 @@ small, .text-muted {
   min-width: 0;
   padding: 1.75rem;
   animation: elaraFadeIn 0.4s ease both;
+}
+
+@media (max-width: 575.98px) {
+  .elara-content {
+    padding: 1rem;
+  }
+
+  .card-elara .card-body.p-4 {
+    padding: 1.25rem !important;
+  }
 }
 
 /* Botón hamburguesa para colapsar/expandir sidebar */
@@ -755,6 +795,28 @@ small, .text-muted {
 .fc-daygrid-day.fc-day-today,
 .fc-timegrid-col.fc-day-today {
   background-color: rgba(201, 161, 90, 0.08) !important;
+}
+
+/* Calendario en pantallas angostas: la barra de herramientas envuelve en
+   vez de desbordarse, y los botones/título ocupan menos espacio. */
+@media (max-width: 575.98px) {
+  .fc .fc-toolbar {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+  }
+
+  .fc .fc-toolbar-title {
+    font-size: 1.05rem;
+  }
+
+  .fc .fc-button {
+    padding: 0.3rem 0.55rem;
+    font-size: 0.8rem;
+  }
+
+  .fc .fc-footer-toolbar {
+    margin-top: 0.75rem;
+  }
 }
 
 /* ==========================================================================

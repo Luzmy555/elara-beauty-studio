@@ -42,16 +42,23 @@
         toastEl.addEventListener("hidden.bs.toast", function () { toastEl.remove(); });
     }
 
+    // En un celular una semana completa de columnas no cabe: arranca en
+    // vista de un solo día y con menos botones en la barra superior.
+    function esPantallaAngosta() {
+        return window.matchMedia("(max-width: 575.98px)").matches;
+    }
+
     if (calendarEl && window.FullCalendar) {
         calendar = new FullCalendar.Calendar(calendarEl, {
             locale: "es",
             height: "auto",
-            headerToolbar: {
-                left: "prev,next today",
-                center: "title",
-                right: "dayGridMonth,timeGridWeek,timeGridDay"
-            },
-            initialView: "timeGridWeek",
+            headerToolbar: esPantallaAngosta()
+                ? { left: "prev,next", center: "title", right: "today" }
+                : { left: "prev,next today", center: "title", right: "dayGridMonth,timeGridWeek,timeGridDay" },
+            footerToolbar: esPantallaAngosta()
+                ? { left: "", center: "dayGridMonth,timeGridDay", right: "" }
+                : false,
+            initialView: esPantallaAngosta() ? "timeGridDay" : "timeGridWeek",
             slotMinTime: "07:00:00",
             slotMaxTime: "21:00:00",
             nowIndicator: true,

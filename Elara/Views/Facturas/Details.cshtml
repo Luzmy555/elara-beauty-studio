@@ -66,48 +66,50 @@
                     <dd class="col-7">@Model.MetodoPago</dd>
                 </dl>
 
-                <table class="table table-sm mb-0">
-                    <thead>
-                        <tr>
-                            <th>Concepto</th>
-                            <th>Especialista</th>
-                            <th class="text-end">Cant.</th>
-                            <th class="text-end">Subtotal</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var detalle in Model.FacturaDetalles)
-                        {
-                            var yaDevuelto = detalle.Devoluciones.Sum(d => d.Cantidad);
-                            var disponibleParaDevolver = detalle.Cantidad - yaDevuelto;
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                        <thead>
                             <tr>
-                                <td>
-                                    @(detalle.Servicio?.Nombre ?? detalle.Producto?.Nombre)
-                                    @if (detalle.ProductoId.HasValue)
-                                    {
-                                        <span class="badge bg-secondary ms-1">Producto</span>
-                                    }
-                                    @if (yaDevuelto > 0)
-                                    {
-                                        <div class="text-elara-muted small">Devuelto: @yaDevuelto de @detalle.Cantidad</div>
-                                    }
-                                </td>
-                                <td>@(detalle.Empleado?.NombreCompleto ?? "—")</td>
-                                <td class="text-end">@detalle.Cantidad</td>
-                                <td class="text-end">$@detalle.Subtotal.ToString("0.00")</td>
-                                <td class="text-end">
-                                    @if (detalle.ProductoId.HasValue && disponibleParaDevolver > 0)
-                                    {
-                                        <a asp-controller="Devoluciones" asp-action="Crear" asp-route-facturaDetalleId="@detalle.Id" class="btn btn-sm btn-outline-elara">
-                                            <i class="bi bi-arrow-return-left"></i> Devolver
-                                        </a>
-                                    }
-                                </td>
+                                <th>Concepto</th>
+                                <th>Especialista</th>
+                                <th class="text-end">Cant.</th>
+                                <th class="text-end">Subtotal</th>
+                                <th></th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach (var detalle in Model.FacturaDetalles)
+                            {
+                                var yaDevuelto = detalle.Devoluciones.Sum(d => d.Cantidad);
+                                var disponibleParaDevolver = detalle.Cantidad - yaDevuelto;
+                                <tr>
+                                    <td>
+                                        @(detalle.Servicio?.Nombre ?? detalle.Producto?.Nombre)
+                                        @if (detalle.ProductoId.HasValue)
+                                        {
+                                            <span class="badge bg-secondary ms-1">Producto</span>
+                                        }
+                                        @if (yaDevuelto > 0)
+                                        {
+                                            <div class="text-elara-muted small">Devuelto: @yaDevuelto de @detalle.Cantidad</div>
+                                        }
+                                    </td>
+                                    <td>@(detalle.Empleado?.NombreCompleto ?? "—")</td>
+                                    <td class="text-end">@detalle.Cantidad</td>
+                                    <td class="text-end">$@detalle.Subtotal.ToString("0.00")</td>
+                                    <td class="text-end">
+                                        @if (detalle.ProductoId.HasValue && disponibleParaDevolver > 0)
+                                        {
+                                            <a asp-controller="Devoluciones" asp-action="Crear" asp-route-facturaDetalleId="@detalle.Id" class="btn btn-sm btn-outline-elara">
+                                                <i class="bi bi-arrow-return-left"></i> Devolver
+                                            </a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -142,33 +144,35 @@
             <div class="card card-elara mt-4">
                 <div class="card-body">
                     <h5 class="card-title font-heading mb-3">Devoluciones de esta factura</h5>
-                    <table class="table table-sm mb-0">
-                        <thead>
-                            <tr>
-                                <th>N°</th>
-                                <th>Fecha</th>
-                                <th class="text-end">Cantidad</th>
-                                <th class="text-end">Monto</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var devolucion in todasLasDevoluciones)
-                            {
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead>
                                 <tr>
-                                    <td>@devolucion.NumeroDevolucion</td>
-                                    <td>@devolucion.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
-                                    <td class="text-end">@devolucion.Cantidad</td>
-                                    <td class="text-end">$@devolucion.MontoReembolsado.ToString("0.00")</td>
-                                    <td class="text-end">
-                                        <a asp-controller="Devoluciones" asp-action="Imprimir" asp-route-id="@devolucion.Id" target="_blank" class="btn btn-sm btn-outline-elara">
-                                            <i class="bi bi-printer"></i>
-                                        </a>
-                                    </td>
+                                    <th>N°</th>
+                                    <th>Fecha</th>
+                                    <th class="text-end">Cantidad</th>
+                                    <th class="text-end">Monto</th>
+                                    <th></th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach (var devolucion in todasLasDevoluciones)
+                                {
+                                    <tr>
+                                        <td>@devolucion.NumeroDevolucion</td>
+                                        <td>@devolucion.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td class="text-end">@devolucion.Cantidad</td>
+                                        <td class="text-end">$@devolucion.MontoReembolsado.ToString("0.00")</td>
+                                        <td class="text-end">
+                                            <a asp-controller="Devoluciones" asp-action="Imprimir" asp-route-id="@devolucion.Id" target="_blank" class="btn btn-sm btn-outline-elara">
+                                                <i class="bi bi-printer"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         }

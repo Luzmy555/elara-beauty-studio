@@ -15,7 +15,7 @@
 
         <form asp-controller="Facturas" asp-action="VentaRapida" method="post" id="ventaRapidaForm" enctype="multipart/form-data">
             <div class="row">
-                <div class="col-md-6 mb-3">
+                <div class="col-12 col-md-6 mb-3">
                     <label class="form-label">Cliente</label>
                     <select name="ClienteId" id="clienteSelect" class="form-select">
                         <option value="">— Cliente sin registrar / Walk-in —</option>
@@ -25,7 +25,7 @@
                         }
                     </select>
                 </div>
-                <div class="col-md-6 mb-3" id="telefonoContactoWrapper">
+                <div class="col-12 col-md-6 mb-3" id="telefonoContactoWrapper">
                     <label asp-for="ClienteTelefonoContacto" class="form-label"></label>
                     <input asp-for="ClienteTelefonoContacto" class="form-control" placeholder="Ej: +1 809-555-1234" />
                     <span asp-validation-for="ClienteTelefonoContacto" class="text-elara-accent small"></span>
@@ -43,18 +43,18 @@
             </div>
 
             <div class="row g-2 d-none d-md-flex text-elara-muted small mb-1">
-                <div class="col-md-3">Servicio</div>
-                <div class="col-md-3">Especialista</div>
-                <div class="col-md-1">Cant.</div>
-                <div class="col-md-2">Precio unitario</div>
-                <div class="col-md-2">Subtotal</div>
+                <div class="col-12 col-md-3">Servicio</div>
+                <div class="col-12 col-md-3">Especialista</div>
+                <div class="col-12 col-md-1">Cant.</div>
+                <div class="col-12 col-md-2">Precio unitario</div>
+                <div class="col-12 col-md-2">Subtotal</div>
             </div>
 
             <div id="lineasContainer">
                 @for (var i = 0; i < Model.Lineas.Count; i++)
                 {
                     <div class="row linea-row align-items-end mb-2 g-2">
-                        <div class="col-md-3">
+                        <div class="col-12 col-md-3">
                             <label class="form-label small d-md-none">Servicio</label>
                             <select name="Lineas[@i].ServicioId" class="form-select linea-servicio">
                                 <option value="">Selecciona…</option>
@@ -64,7 +64,7 @@
                                 }
                             </select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-12 col-md-3">
                             <label class="form-label small d-md-none">Especialista</label>
                             <select name="Lineas[@i].EmpleadoId" class="form-select">
                                 <option value="">Selecciona…</option>
@@ -101,7 +101,7 @@
 
             <template id="lineaTemplate">
                 <div class="row linea-row align-items-end mb-2 g-2">
-                    <div class="col-md-3">
+                    <div class="col-12 col-md-3">
                         <label class="form-label small d-md-none">Servicio</label>
                         <select name="Lineas[IDX].ServicioId" class="form-select linea-servicio">
                             <option value="">Selecciona…</option>
@@ -111,7 +111,7 @@
                             }
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-12 col-md-3">
                         <label class="form-label small d-md-none">Especialista</label>
                         <select name="Lineas[IDX].EmpleadoId" class="form-select">
                             <option value="">Selecciona…</option>
@@ -154,11 +154,11 @@
             </div>
 
             <div class="row g-2 d-none d-md-flex text-elara-muted small mb-1">
-                <div class="col-md-3">Producto</div>
-                <div class="col-md-3">Vendido por (opcional)</div>
-                <div class="col-md-1">Cant.</div>
-                <div class="col-md-2">Precio unitario</div>
-                <div class="col-md-2">Subtotal</div>
+                <div class="col-12 col-md-3">Producto</div>
+                <div class="col-12 col-md-3">Vendido por (opcional)</div>
+                <div class="col-12 col-md-1">Cant.</div>
+                <div class="col-12 col-md-2">Precio unitario</div>
+                <div class="col-12 col-md-2">Subtotal</div>
             </div>
 
             <div id="lineasProductoContainer">
@@ -167,7 +167,7 @@
 
             <template id="lineaProductoTemplate">
                 <div class="row linea-producto-row align-items-end mb-2 g-2">
-                    <div class="col-md-3">
+                    <div class="col-12 col-md-3">
                         <label class="form-label small d-md-none">Producto</label>
                         <select name="LineasProductos[IDX].ProductoId" class="form-select linea-producto-select">
                             <option value="">Selecciona…</option>
@@ -177,7 +177,7 @@
                             }
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-12 col-md-3">
                         <label class="form-label small d-md-none">Vendido por</label>
                         <select name="LineasProductos[IDX].EmpleadoId" class="form-select">
                             <option value="">— Sin especialista —</option>
@@ -213,7 +213,7 @@
             <hr class="elara-divider" />
 
             <div class="row">
-                <div class="col-md-6 mb-3">
+                <div class="col-12 col-md-6 mb-3">
                     <label asp-for="Descuento" class="form-label"></label>
                     <div class="input-group">
                         <span class="input-group-text">$</span>
@@ -221,7 +221,7 @@
                     </div>
                     <span asp-validation-for="Descuento" class="text-elara-accent small"></span>
                 </div>
-                <div class="col-md-6 mb-3">
+                <div class="col-12 col-md-6 mb-3">
                     <label asp-for="DescuentoJustificacion" class="form-label"></label>
                     <input asp-for="DescuentoJustificacion" class="form-control" placeholder="Obligatorio si aplicas un descuento" />
                     <span asp-validation-for="DescuentoJustificacion" class="text-elara-accent small"></span>
@@ -233,11 +233,11 @@
             <div class="elara-caja">
                 <h6 class="text-elara-muted text-uppercase small mb-3"><i class="bi bi-cash-coin me-1"></i> Cobro en caja</h6>
                 <div class="row g-3 align-items-end">
-                    <div class="col-md-4">
+                    <div class="col-12 col-md-4">
                         <label asp-for="MetodoPago" class="form-label"></label>
                         <select asp-for="MetodoPago" id="metodoPagoSelect" class="form-select" asp-items="Html.GetEnumSelectList<MetodoPago>()"></select>
                     </div>
-                    <div class="col-md-4" id="montoRecibidoWrapper">
+                    <div class="col-12 col-md-4" id="montoRecibidoWrapper">
                         <label asp-for="MontoRecibido" class="form-label"></label>
                         <div class="input-group">
                             <span class="input-group-text">$</span>
@@ -245,11 +245,11 @@
                         </div>
                         <span asp-validation-for="MontoRecibido" class="text-elara-accent small"></span>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-12 col-md-4">
                         <label asp-for="Estado" class="form-label"></label>
                         <select asp-for="Estado" class="form-select" asp-items="Html.GetEnumSelectList<EstadoFactura>()"></select>
                     </div>
-                    <div class="col-md-8" id="comprobanteTransferenciaWrapper">
+                    <div class="col-12 col-md-8" id="comprobanteTransferenciaWrapper">
                         <label asp-for="ComprobanteTransferencia" class="form-label"></label>
                         <input asp-for="ComprobanteTransferencia" type="file" accept="image/*" class="form-control" />
                         <div class="form-text">Opcional — también se puede adjuntar después desde el detalle de la factura.</div>
