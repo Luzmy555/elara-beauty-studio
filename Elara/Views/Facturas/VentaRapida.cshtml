@@ -6,10 +6,10 @@
 
 <div class="mb-4">
     <h1 class="h3 mb-1">Nueva factura</h1>
-    <p class="text-elara-muted">Venta rápida — no depende de una cita agendada. Puedes agregar varios servicios, cada uno con su propio especialista.</p>
+    <p class="text-elara-muted">Venta rápida — no depende de una cita agendada. Puedes agregar varios servicios, cada uno con su propio especialista y precio.</p>
 </div>
 
-<div class="card card-elara" style="max-width: 860px;">
+<div class="card card-elara" style="max-width: 960px;">
     <div class="card-body p-4">
         <div asp-validation-summary="All" class="text-elara-accent mb-3"></div>
 
@@ -42,22 +42,30 @@
                 </button>
             </div>
 
+            <div class="row g-2 d-none d-md-flex text-elara-muted small mb-1">
+                <div class="col-md-3">Servicio</div>
+                <div class="col-md-3">Especialista</div>
+                <div class="col-md-1">Cant.</div>
+                <div class="col-md-2">Precio unitario</div>
+                <div class="col-md-2">Subtotal</div>
+            </div>
+
             <div id="lineasContainer">
                 @for (var i = 0; i < Model.Lineas.Count; i++)
                 {
-                    <div class="row linea-row align-items-end mb-2">
-                        <div class="col-5">
-                            <label class="form-label small">Servicio</label>
+                    <div class="row linea-row align-items-end mb-2 g-2">
+                        <div class="col-md-3">
+                            <label class="form-label small d-md-none">Servicio</label>
                             <select name="Lineas[@i].ServicioId" class="form-select linea-servicio">
                                 <option value="">Selecciona…</option>
                                 @foreach (var servicio in Model.ServiciosDisponibles)
                                 {
-                                    <option value="@servicio.Id" data-precio="@servicio.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)" selected="@(Model.Lineas[i].ServicioId == servicio.Id ? "selected" : null)">@servicio.Nombre — $@servicio.Precio.ToString("0.00")</option>
+                                    <option value="@servicio.Id" data-precio="@servicio.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)" selected="@(Model.Lineas[i].ServicioId == servicio.Id ? "selected" : null)">@servicio.Nombre</option>
                                 }
                             </select>
                         </div>
-                        <div class="col-4">
-                            <label class="form-label small">Especialista</label>
+                        <div class="col-md-3">
+                            <label class="form-label small d-md-none">Especialista</label>
                             <select name="Lineas[@i].EmpleadoId" class="form-select">
                                 <option value="">Selecciona…</option>
                                 @foreach (var empleado in Model.EmpleadosDisponibles)
@@ -66,12 +74,22 @@
                                 }
                             </select>
                         </div>
-                        <div class="col-2">
-                            <label class="form-label small">Cant.</label>
+                        <div class="col-6 col-md-1">
+                            <label class="form-label small d-md-none">Cant.</label>
                             <input type="number" name="Lineas[@i].Cantidad" min="1" value="@Model.Lineas[i].Cantidad" class="form-control linea-cantidad" />
                         </div>
-                        <div class="col-1 text-end small linea-subtotal text-elara-muted">$0.00</div>
-                        <div class="col-auto">
+                        <div class="col-6 col-md-2">
+                            <label class="form-label small d-md-none">Precio unitario</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" name="Lineas[@i].PrecioUnitario" min="0" step="0.01" value="@Model.Lineas[i].PrecioUnitario.ToString("0.00")" class="form-control linea-precio" />
+                            </div>
+                        </div>
+                        <div class="col-8 col-md-2">
+                            <label class="form-label small d-md-none">Subtotal</label>
+                            <div class="form-control-plaintext fw-semibold linea-subtotal">$0.00</div>
+                        </div>
+                        <div class="col-4 col-md-1 text-end">
                             <button type="button" class="btn btn-sm btn-outline-elara quitar-linea-btn" title="Quitar">
                                 <i class="bi bi-trash"></i>
                             </button>
@@ -82,19 +100,19 @@
             <span asp-validation-for="Lineas" class="text-elara-accent small d-block mb-3"></span>
 
             <template id="lineaTemplate">
-                <div class="row linea-row align-items-end mb-2">
-                    <div class="col-5">
-                        <label class="form-label small">Servicio</label>
+                <div class="row linea-row align-items-end mb-2 g-2">
+                    <div class="col-md-3">
+                        <label class="form-label small d-md-none">Servicio</label>
                         <select name="Lineas[IDX].ServicioId" class="form-select linea-servicio">
                             <option value="">Selecciona…</option>
                             @foreach (var servicio in Model.ServiciosDisponibles)
                             {
-                                <option value="@servicio.Id" data-precio="@servicio.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)">@servicio.Nombre — $@servicio.Precio.ToString("0.00")</option>
+                                <option value="@servicio.Id" data-precio="@servicio.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)">@servicio.Nombre</option>
                             }
                         </select>
                     </div>
-                    <div class="col-4">
-                        <label class="form-label small">Especialista</label>
+                    <div class="col-md-3">
+                        <label class="form-label small d-md-none">Especialista</label>
                         <select name="Lineas[IDX].EmpleadoId" class="form-select">
                             <option value="">Selecciona…</option>
                             @foreach (var empleado in Model.EmpleadosDisponibles)
@@ -103,12 +121,22 @@
                             }
                         </select>
                     </div>
-                    <div class="col-2">
-                        <label class="form-label small">Cant.</label>
+                    <div class="col-6 col-md-1">
+                        <label class="form-label small d-md-none">Cant.</label>
                         <input type="number" name="Lineas[IDX].Cantidad" min="1" value="1" class="form-control linea-cantidad" />
                     </div>
-                    <div class="col-1 text-end small linea-subtotal text-elara-muted">$0.00</div>
-                    <div class="col-auto">
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small d-md-none">Precio unitario</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" name="Lineas[IDX].PrecioUnitario" min="0" step="0.01" value="0.00" class="form-control linea-precio" />
+                        </div>
+                    </div>
+                    <div class="col-8 col-md-2">
+                        <label class="form-label small d-md-none">Subtotal</label>
+                        <div class="form-control-plaintext fw-semibold linea-subtotal">$0.00</div>
+                    </div>
+                    <div class="col-4 col-md-1 text-end">
                         <button type="button" class="btn btn-sm btn-outline-elara quitar-linea-btn" title="Quitar">
                             <i class="bi bi-trash"></i>
                         </button>
@@ -126,30 +154,58 @@
                         <input asp-for="Descuento" type="number" min="0" step="0.01" class="form-control" id="descuentoInput" />
                     </div>
                     <span asp-validation-for="Descuento" class="text-elara-accent small"></span>
-                    <div class="form-text">
-                        Subtotal: <strong id="subtotalPreview">$0.00</strong>
-                        — Total: <strong id="totalPreview" class="text-elara-accent">$0.00</strong>
-                    </div>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label asp-for="MetodoPago" class="form-label"></label>
-                    <select asp-for="MetodoPago" class="form-select" asp-items="Html.GetEnumSelectList<MetodoPago>()"></select>
+                    <label asp-for="DescuentoJustificacion" class="form-label"></label>
+                    <input asp-for="DescuentoJustificacion" class="form-control" placeholder="Obligatorio si aplicas un descuento" />
+                    <span asp-validation-for="DescuentoJustificacion" class="text-elara-accent small"></span>
                 </div>
             </div>
 
-            <div class="mb-3">
-                <label asp-for="DescuentoJustificacion" class="form-label"></label>
-                <input asp-for="DescuentoJustificacion" class="form-control" placeholder="Obligatorio si aplicas un descuento" />
-                <span asp-validation-for="DescuentoJustificacion" class="text-elara-accent small"></span>
+            <hr class="elara-divider" />
+
+            <div class="elara-caja">
+                <h6 class="text-elara-muted text-uppercase small mb-3"><i class="bi bi-cash-coin me-1"></i> Cobro en caja</h6>
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label asp-for="MetodoPago" class="form-label"></label>
+                        <select asp-for="MetodoPago" id="metodoPagoSelect" class="form-select" asp-items="Html.GetEnumSelectList<MetodoPago>()"></select>
+                    </div>
+                    <div class="col-md-4" id="montoRecibidoWrapper">
+                        <label asp-for="MontoRecibido" class="form-label"></label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input asp-for="MontoRecibido" type="number" min="0" step="0.01" class="form-control" id="montoRecibidoInput" placeholder="0.00" />
+                        </div>
+                        <span asp-validation-for="MontoRecibido" class="text-elara-accent small"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Estado" class="form-label"></label>
+                        <select asp-for="Estado" class="form-select" asp-items="Html.GetEnumSelectList<EstadoFactura>()"></select>
+                    </div>
+                </div>
+
+                <div class="elara-caja-totales mt-4">
+                    <div class="d-flex justify-content-between">
+                        <span>Subtotal</span>
+                        <span id="subtotalPreview">$0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between text-elara-danger">
+                        <span>Descuento</span>
+                        <span id="descuentoPreview">-$0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between elara-caja-total-final">
+                        <strong>Total a cobrar</strong>
+                        <strong id="totalPreview">$0.00</strong>
+                    </div>
+                    <div class="d-flex justify-content-between elara-caja-devuelta mt-2" id="devueltaWrapper">
+                        <strong>Devuelta</strong>
+                        <strong id="devueltaPreview">$0.00</strong>
+                    </div>
+                </div>
             </div>
 
-            <div class="mb-4">
-                <label asp-for="Estado" class="form-label"></label>
-                <select asp-for="Estado" class="form-select" asp-items="Html.GetEnumSelectList<EstadoFactura>()"></select>
-                <div class="form-text">Marca "Pendiente" si el cliente pagará después.</div>
-            </div>
-
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 mt-4">
                 <button type="submit" class="btn btn-elara">
                     <i class="bi bi-receipt me-1"></i> Emitir factura
                 </button>

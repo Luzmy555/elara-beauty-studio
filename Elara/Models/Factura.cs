@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace ElaraMVC.Models;
 
 public class Factura
@@ -27,6 +29,13 @@ public class Factura
 
     public MetodoPago MetodoPago { get; set; }
     public EstadoFactura Estado { get; set; } = EstadoFactura.Pagada;
+
+    // Solo aplica a MetodoPago.Efectivo: cuánto entregó el cliente físicamente,
+    // para poder calcular la devuelta en caja. Null en pagos con tarjeta/transferencia.
+    public decimal? MontoRecibido { get; set; }
+
+    [NotMapped]
+    public decimal? Devuelta => MontoRecibido.HasValue ? MontoRecibido.Value - Total : null;
 
     public DateTime FechaEmision { get; set; } = DateTime.Now;
 

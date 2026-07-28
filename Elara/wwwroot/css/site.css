@@ -799,3 +799,38 @@ small, .text-muted {
 ::-webkit-scrollbar-track {
   background-color: var(--elara-blush);
 }
+
+/* Sección de "cobro en caja" en Facturas/VentaRapida: se distingue del resto
+   del formulario porque es literalmente la acción de cobrar, no un detalle más. */
+.elara-caja {
+  background-color: var(--elara-charcoal);
+  color: var(--elara-ivory);
+  border-radius: var(--elara-radius-lg);
+  padding: 1.5rem;
+}
+.elara-caja .form-label,
+.elara-caja .text-elara-muted {
+  color: var(--elara-gold-soft) !important;
+}
+.elara-caja-totales {
+  max-width: 420px;
+  margin-left: auto;
+  font-size: 1.05rem;
+}
+.elara-caja-totales > div {
+  padding: 0.25rem 0;
+}
+.elara-caja-total-final {
+  border-top: 2px solid var(--elara-gold);
+  margin-top: 0.5rem;
+  padding-top: 0.75rem !important;
+  font-size: 1.4rem;
+  color: var(--elara-gold-soft);
+}
+.elara-caja-devuelta {
+  font-size: 1.25rem;
+  color: var(--elara-gold-soft);
+}
+.elara-caja-devuelta.elara-caja-devuelta-insuficiente {
+  color: var(--elara-terracotta);
+}

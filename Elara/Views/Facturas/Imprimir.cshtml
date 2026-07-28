@@ -85,6 +85,17 @@
                 <span>Método de pago</span>
                 <span>@Model.MetodoPago</span>
             </div>
+            @if (Model.MontoRecibido.HasValue)
+            {
+                <div class="d-flex justify-content-between text-elara-muted small">
+                    <span>Monto recibido</span>
+                    <span>$@Model.MontoRecibido.Value.ToString("0.00")</span>
+                </div>
+                <div class="d-flex justify-content-between text-elara-muted small">
+                    <span>Devuelta</span>
+                    <span>$@Model.Devuelta!.Value.ToString("0.00")</span>
+                </div>
+            }
         </div>
     </section>
 

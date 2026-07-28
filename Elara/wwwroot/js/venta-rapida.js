@@ -1,16 +1,23 @@
 // Formulario de venta rápida (Facturas/VentaRapida): líneas de servicio
-// dinámicas y vista previa de subtotal/total. El servidor siempre recalcula
-// los precios reales al emitir; esto es solo para que la recepcionista vea
-// el número antes de confirmar.
+// dinámicas con precio editable, y la caja (método de pago, monto recibido,
+// devuelta). El servidor siempre revalida (el monto recibido no puede ser
+// menor al total); esto es solo para que la recepcionista vea los números
+// antes de confirmar.
 (function () {
     var lineasContainer = document.getElementById("lineasContainer");
     var agregarBtn = document.getElementById("agregarLineaBtn");
     var template = document.getElementById("lineaTemplate");
     var descuentoInput = document.getElementById("descuentoInput");
     var subtotalPreview = document.getElementById("subtotalPreview");
+    var descuentoPreview = document.getElementById("descuentoPreview");
     var totalPreview = document.getElementById("totalPreview");
     var clienteSelect = document.getElementById("clienteSelect");
     var telefonoWrapper = document.getElementById("telefonoContactoWrapper");
+    var metodoPagoSelect = document.getElementById("metodoPagoSelect");
+    var montoRecibidoWrapper = document.getElementById("montoRecibidoWrapper");
+    var montoRecibidoInput = document.getElementById("montoRecibidoInput");
+    var devueltaWrapper = document.getElementById("devueltaWrapper");
+    var devueltaPreview = document.getElementById("devueltaPreview");
 
     if (!lineasContainer || !template) {
         return;
@@ -31,15 +38,14 @@
     }
 
     function recalcularLinea(fila) {
-        var servicioSelect = fila.querySelector(".linea-servicio");
+        var precioInput = fila.querySelector(".linea-precio");
         var cantidadInput = fila.querySelector(".linea-cantidad");
-        var subtotalSpan = fila.querySelector(".linea-subtotal");
-        var opcion = servicioSelect.options[servicioSelect.selectedIndex];
-        var precio = opcion ? parseFloat(opcion.getAttribute("data-precio")) || 0 : 0;
+        var subtotalDiv = fila.querySelector(".linea-subtotal");
+        var precio = parseFloat(precioInput.value) || 0;
         var cantidad = parseFloat(cantidadInput.value) || 0;
         var subtotal = precio * cantidad;
 
-        subtotalSpan.textContent = "$" + subtotal.toFixed(2);
+        subtotalDiv.textContent = "$" + subtotal.toFixed(2);
         return subtotal;
     }
 
@@ -53,13 +59,38 @@
         var total = Math.max(subtotalGeneral - descuento, 0);
 
         subtotalPreview.textContent = "$" + subtotalGeneral.toFixed(2);
+        descuentoPreview.textContent = "-$" + descuento.toFixed(2);
         totalPreview.textContent = "$" + total.toFixed(2);
+
+        actualizarDevuelta(total);
+    }
+
+    function actualizarDevuelta(total) {
+        var esEfectivo = metodoPagoSelect.value === "Efectivo";
+        montoRecibidoWrapper.style.display = esEfectivo ? "" : "none";
+        devueltaWrapper.style.display = esEfectivo ? "" : "none";
+
+        if (!esEfectivo) {
+            return;
+        }
+
+        var montoRecibido = parseFloat(montoRecibidoInput.value) || 0;
+        var devuelta = montoRecibido - total;
+        devueltaPreview.textContent = "$" + Math.abs(devuelta).toFixed(2);
+        devueltaWrapper.classList.toggle("elara-caja-devuelta-insuficiente", devuelta < 0);
     }
 
     function agregarListenersFila(fila) {
-        fila.querySelectorAll(".linea-servicio, .linea-cantidad").forEach(function (campo) {
+        fila.querySelectorAll(".linea-precio, .linea-cantidad").forEach(function (campo) {
             campo.addEventListener("input", recalcularTotales);
-            campo.addEventListener("change", recalcularTotales);
+        });
+
+        var servicioSelect = fila.querySelector(".linea-servicio");
+        var precioInput = fila.querySelector(".linea-precio");
+        servicioSelect.addEventListener("change", function () {
+            var opcion = servicioSelect.options[servicioSelect.selectedIndex];
+            precioInput.value = opcion ? (parseFloat(opcion.getAttribute("data-precio")) || 0).toFixed(2) : "0.00";
+            recalcularTotales();
         });
 
         fila.querySelector(".quitar-linea-btn").addEventListener("click", function () {
@@ -83,6 +114,8 @@
     });
 
     descuentoInput.addEventListener("input", recalcularTotales);
+    metodoPagoSelect.addEventListener("change", recalcularTotales);
+    montoRecibidoInput.addEventListener("input", recalcularTotales);
 
     if (clienteSelect && telefonoWrapper) {
         var actualizarTelefonoWrapper = function () {

@@ -13,6 +13,11 @@ public class VentaRapidaLineaViewModel
 
     [Range(1, 100, ErrorMessage = "La cantidad debe ser al menos 1.")]
     public int Cantidad { get; set; } = 1;
+
+    // Se precarga con el precio de catálogo del servicio pero el recepcionista
+    // puede editarlo (precio negociado, promoción puntual, etc.).
+    [Range(0, 1000000, ErrorMessage = "El precio no puede ser negativo.")]
+    public decimal PrecioUnitario { get; set; }
 }
 
 public class VentaRapidaViewModel : IValidatableObject
@@ -41,6 +46,12 @@ public class VentaRapidaViewModel : IValidatableObject
     [Display(Name = "Estado")]
     public EstadoFactura Estado { get; set; } = EstadoFactura.Pagada;
 
+    // Solo tiene sentido con MetodoPago.Efectivo; con tarjeta/transferencia se
+    // ignora aunque venga cargado (no hay "devuelta" en esos métodos).
+    [Range(0, 10000000, ErrorMessage = "El monto recibido no puede ser negativo.")]
+    [Display(Name = "Monto recibido")]
+    public decimal? MontoRecibido { get; set; }
+
     // Para repoblar los selectores si el formulario vuelve por un error de validación.
     public List<Cliente> ClientesDisponibles { get; set; } = new();
     public List<Empleado> EmpleadosDisponibles { get; set; } = new();
@@ -60,6 +71,18 @@ public class VentaRapidaViewModel : IValidatableObject
             yield return new ValidationResult(
                 "Si aplicas un descuento, indica la justificación.",
                 new[] { nameof(DescuentoJustificacion) });
+        }
+
+        if (MetodoPago == MetodoPago.Efectivo && MontoRecibido.HasValue && Lineas != null && Lineas.Count > 0)
+        {
+            var subtotal = Lineas.Sum(l => l.PrecioUnitario * l.Cantidad);
+            var total = subtotal - Descuento;
+            if (MontoRecibido.Value < total)
+            {
+                yield return new ValidationResult(
+                    "El monto recibido es menor al total a cobrar.",
+                    new[] { nameof(MontoRecibido) });
+            }
         }
     }
 }

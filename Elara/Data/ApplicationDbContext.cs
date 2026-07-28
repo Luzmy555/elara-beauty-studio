@@ -132,6 +132,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(f => f.Subtotal).HasPrecision(10, 2);
             entity.Property(f => f.Descuento).HasPrecision(10, 2);
             entity.Property(f => f.Total).HasPrecision(10, 2);
+            entity.Property(f => f.MontoRecibido).HasPrecision(10, 2);
 
             // Único por construcción (se deriva 1 a 1 del Id autoincremental
             // justo después del insert), no hace falta un índice único aparte.

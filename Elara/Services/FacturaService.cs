@@ -173,16 +173,19 @@ public class FacturaService : IFacturaService
 
             var cantidad = linea.Cantidad < 1 ? 1 : linea.Cantidad;
 
-            // El precio nunca se toma del formulario: siempre se recalcula
-            // desde el precio real y vigente del servicio.
-            var subtotalLinea = servicio.Precio * cantidad;
+            // A diferencia del flujo desde cita, aquí el precio SÍ lo decide
+            // quien factura (venta rápida en caja: promociones, precio
+            // negociado, etc.) — el catálogo solo sirve para precargar un
+            // valor por defecto en el formulario.
+            var precioUnitario = linea.PrecioUnitario;
+            var subtotalLinea = precioUnitario * cantidad;
 
             lineas.Add((new FacturaDetalle
             {
                 ServicioId = servicio.Id,
                 EmpleadoId = empleado.Id,
                 Cantidad = cantidad,
-                PrecioUnitario = servicio.Precio,
+                PrecioUnitario = precioUnitario,
                 Subtotal = subtotalLinea
             }, empleado.ComisionPorcentaje));
         }
@@ -215,6 +218,14 @@ public class FacturaService : IFacturaService
             ? model.ClienteTelefonoContacto.Trim()
             : null;
 
+        // La devuelta solo existe en efectivo; en tarjeta/transferencia se
+        // ignora aunque el formulario traiga algo cargado.
+        var montoRecibido = model.MetodoPago == MetodoPago.Efectivo ? model.MontoRecibido : null;
+        if (montoRecibido.HasValue && montoRecibido.Value < total)
+        {
+            return (false, "El monto recibido es menor al total a cobrar.", null);
+        }
+
         var factura = new Factura
         {
             ClienteId = cliente?.Id,
@@ -225,6 +236,7 @@ public class FacturaService : IFacturaService
             Total = total,
             MetodoPago = model.MetodoPago,
             Estado = model.Estado,
+            MontoRecibido = montoRecibido,
             FechaEmision = DateTime.Now,
             FacturaDetalles = lineas.Select(l => l.Detalle).ToList()
         };

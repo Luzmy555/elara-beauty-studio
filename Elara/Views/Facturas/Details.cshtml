@@ -23,7 +23,7 @@
         @if (whatsappUrl != null)
         {
             <a href="@whatsappUrl" target="_blank" rel="noopener" class="btn btn-success">
-                <i class="bi bi-whatsapp me-1"></i> Enviar por WhatsApp
+                <i class="bi bi-whatsapp me-1"></i> Abrir WhatsApp con el mensaje
             </a>
         }
         <a asp-controller="Facturas" asp-action="Imprimir" asp-route-id="@Model.Id" target="_blank" class="btn btn-elara">
@@ -38,6 +38,14 @@
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="alert badge-elara-success mb-4">@TempData["SuccessMessage"]</div>
+}
+
+@if (whatsappUrl != null)
+{
+    <p class="text-elara-muted small mt-n3 mb-4">
+        <i class="bi bi-info-circle me-1"></i>
+        El botón abre WhatsApp (Web o app) con el mensaje ya escrito — todavía debes presionar "Enviar" dentro de WhatsApp para que le llegue al cliente. Esto no se puede automatizar sin contratar la API oficial de WhatsApp Business.
+    </p>
 }
 
 <div class="row g-4">
@@ -101,6 +109,18 @@
                     <span>Total</span>
                     <span>$@Model.Total.ToString("0.00")</span>
                 </div>
+
+                @if (Model.MontoRecibido.HasValue)
+                {
+                    <div class="d-flex justify-content-between mt-2 text-elara-muted small">
+                        <span>Monto recibido</span>
+                        <span>$@Model.MontoRecibido.Value.ToString("0.00")</span>
+                    </div>
+                    <div class="d-flex justify-content-between fw-semibold">
+                        <span>Devuelta</span>
+                        <span>$@Model.Devuelta!.Value.ToString("0.00")</span>
+                    </div>
+                }
 
                 @if (User.IsInRole("Administrador"))
                 {
