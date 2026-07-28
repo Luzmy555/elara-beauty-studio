@@ -8,8 +8,6 @@
     var subtotalPreview = document.getElementById("subtotalPreview");
     var descuentoPreview = document.getElementById("descuentoPreview");
     var totalPreview = document.getElementById("totalPreview");
-    var metodoPagoSelect = document.getElementById("metodoPagoSelect");
-    var montoRecibidoWrapper = document.getElementById("montoRecibidoWrapper");
     var montoRecibidoInput = document.getElementById("montoRecibidoInput");
     var devueltaWrapper = document.getElementById("devueltaWrapper");
     var devueltaPreview = document.getElementById("devueltaPreview");
@@ -32,15 +30,9 @@
     }
 
     function actualizarDevuelta(total) {
-        if (!metodoPagoSelect || !montoRecibidoWrapper || !devueltaWrapper) {
-            return;
-        }
-
-        var esEfectivo = metodoPagoSelect.value === "Efectivo";
-        montoRecibidoWrapper.style.display = esEfectivo ? "" : "none";
-        devueltaWrapper.style.display = esEfectivo ? "" : "none";
-
-        if (!esEfectivo) {
+        // El campo queda siempre visible, sin importar el método de pago: el
+        // servidor igual ignora este valor si el pago no es en efectivo.
+        if (!devueltaWrapper || !montoRecibidoInput) {
             return;
         }
 
@@ -51,9 +43,6 @@
     }
 
     descuentoInput.addEventListener("input", recalcular);
-    if (metodoPagoSelect) {
-        metodoPagoSelect.addEventListener("change", recalcular);
-    }
     if (montoRecibidoInput) {
         montoRecibidoInput.addEventListener("input", recalcular);
     }

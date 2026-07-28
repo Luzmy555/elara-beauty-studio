@@ -20,7 +20,6 @@
     var clienteSelect = document.getElementById("clienteSelect");
     var telefonoWrapper = document.getElementById("telefonoContactoWrapper");
     var metodoPagoSelect = document.getElementById("metodoPagoSelect");
-    var montoRecibidoWrapper = document.getElementById("montoRecibidoWrapper");
     var montoRecibidoInput = document.getElementById("montoRecibidoInput");
     var devueltaWrapper = document.getElementById("devueltaWrapper");
     var devueltaPreview = document.getElementById("devueltaPreview");
@@ -106,16 +105,12 @@
     }
 
     function actualizarDevuelta(total) {
-        var esEfectivo = metodoPagoSelect.value === "Efectivo";
-        montoRecibidoWrapper.style.display = esEfectivo ? "" : "none";
-        devueltaWrapper.style.display = esEfectivo ? "" : "none";
-
+        // El campo queda siempre visible (independiente del método de pago):
+        // ocultarlo con JS según selección causaba que algunos navegadores
+        // nunca lo mostraran. El servidor igual ignora este valor si el pago
+        // no es en efectivo.
         if (comprobanteWrapper) {
             comprobanteWrapper.style.display = metodoPagoSelect.value === "Transferencia" ? "" : "none";
-        }
-
-        if (!esEfectivo) {
-            return;
         }
 
         var montoRecibido = parseFloat(montoRecibidoInput.value) || 0;
