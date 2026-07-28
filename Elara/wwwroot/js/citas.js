@@ -100,28 +100,46 @@
         });
     }
 
-    function abrirFormularioCreacion(fechaStr) {
+    // Si la sesión expiró (o el usuario perdió permisos), el servidor
+    // redirige estas peticiones a la pantalla de login: sin este chequeo, el
+    // modal terminaba mostrando el HTML crudo del login por dentro, lo que
+    // parecía "no hacer nada". Se detecta y se avisa en vez de eso.
+    function sesionExpirada(response) {
+        return response.redirected && response.url.indexOf("/Account/Login") !== -1;
+    }
+
+    function cargarFormularioEnModal(url, titulo) {
         if (!modal) { return; }
-        modalTitle.textContent = "Nueva cita";
-        fetch(config.formularioCreacionUrl + "?fecha=" + encodeURIComponent(fechaStr))
-            .then(function (r) { return r.text(); })
+        modalTitle.textContent = titulo;
+        fetch(url)
+            .then(function (r) {
+                if (sesionExpirada(r)) {
+                    mostrarToast("Tu sesión expiró. Recarga la página e inicia sesión de nuevo.", "error");
+                    return null;
+                }
+                if (!r.ok) {
+                    mostrarToast("No se pudo cargar el formulario. Intenta de nuevo.", "error");
+                    return null;
+                }
+                return r.text();
+            })
             .then(function (html) {
+                if (html == null) { return; }
                 modalBody.innerHTML = html;
                 inicializarFormulario();
                 modal.show();
+            })
+            .catch(function () {
+                mostrarToast("Ocurrió un error de conexión.", "error");
             });
     }
 
+    function abrirFormularioCreacion(fechaStr) {
+        cargarFormularioEnModal(config.formularioCreacionUrl + "?fecha=" + encodeURIComponent(fechaStr), "Nueva cita");
+    }
+
     function abrirFormularioEdicion(id) {
-        if (!modal) { return; }
-        modalTitle.textContent = "Editar cita";
-        fetch(config.formularioEdicionUrl + "/" + id)
-            .then(function (r) { return r.text(); })
-            .then(function (html) {
-                modalBody.innerHTML = html;
-                inicializarFormulario();
-                modal.show();
-            });
+        cargarFormularioEnModal(config.formularioEdicionUrl + "/" + id, "Editar cita");
     }
 
     function inicializarFormulario() {
