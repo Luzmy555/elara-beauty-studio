@@ -1,10 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>ElaraMVC</RootNamespace>
+    <UserSecretsId>8a2e8f1c-2a57-4ab7-aac8-44a507300d9c</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
