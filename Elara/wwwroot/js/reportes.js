@@ -19,12 +19,14 @@
     var chartRanking = null;
     var chartClientes = null;
 
+    var fetchApp = window.elaraFetch || fetch;
+
     function queryString() {
         return "?desde=" + encodeURIComponent(desdeInput.value) + "&hasta=" + encodeURIComponent(hastaInput.value);
     }
 
     function cargarIngresos() {
-        fetch(config.ingresosUrl + queryString())
+        fetchApp(config.ingresosUrl + queryString())
             .then(function (r) { return r.json(); })
             .then(function (datos) {
                 var ctx = document.getElementById("chartIngresos");
@@ -53,7 +55,7 @@
     }
 
     function cargarServicios() {
-        fetch(config.serviciosUrl + queryString())
+        fetchApp(config.serviciosUrl + queryString())
             .then(function (r) { return r.json(); })
             .then(function (datos) {
                 var ctx = document.getElementById("chartServicios");
@@ -79,7 +81,7 @@
     }
 
     function cargarRanking() {
-        fetch(config.rankingUrl + queryString())
+        fetchApp(config.rankingUrl + queryString())
             .then(function (r) { return r.json(); })
             .then(function (datos) {
                 var ctx = document.getElementById("chartRanking");
@@ -109,7 +111,7 @@
     }
 
     function cargarClientes() {
-        fetch(config.clientesUrl + queryString())
+        fetchApp(config.clientesUrl + queryString())
             .then(function (r) { return r.json(); })
             .then(function (datos) {
                 var ctx = document.getElementById("chartClientes");

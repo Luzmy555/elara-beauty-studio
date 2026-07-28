@@ -16,6 +16,11 @@
     var modalTitle = document.getElementById("citaModalTitle");
     var calendar = null;
 
+    // Definido en site.js (se carga en todas las vistas): agrega el header
+    // que evita que un túnel de ngrok intercepte la petición con su propia
+    // página de aviso en vez de dejarla pasar al servidor real.
+    var fetchApp = window.elaraFetch || fetch;
+
     function obtenerTokenGlobal() {
         var tokenInput = document.querySelector('#globalAntiForgeryForm input[name="__RequestVerificationToken"]');
         return tokenInput ? tokenInput.value : "";
@@ -64,7 +69,7 @@
             nowIndicator: true,
             editable: !!config.puedeArrastrar,
             events: function (info, successCallback, failureCallback) {
-                fetch(config.eventosUrl + "?start=" + info.startStr + "&end=" + info.endStr)
+                fetchApp(config.eventosUrl + "?start=" + info.startStr + "&end=" + info.endStr)
                     .then(function (r) { return r.json(); })
                     .then(successCallback)
                     .catch(failureCallback);
@@ -118,7 +123,7 @@
     function cargarFormularioEnModal(url, titulo) {
         if (!modal) { return; }
         modalTitle.textContent = titulo;
-        fetch(url)
+        fetchApp(url)
             .then(function (r) {
                 if (sesionExpirada(r)) {
                     mostrarToast("Tu sesión expiró. Recarga la página e inicia sesión de nuevo.", "error");
@@ -185,7 +190,7 @@
                 return;
             }
             debounceTimer = setTimeout(function () {
-                fetch("/Citas/BuscarClientes?term=" + encodeURIComponent(term))
+                fetchApp("/Citas/BuscarClientes?term=" + encodeURIComponent(term))
                     .then(function (r) { return r.json(); })
                     .then(function (clientes) {
                         resultados.innerHTML = "";
@@ -231,7 +236,7 @@
                 url += "&citaId=" + citaIdActual;
             }
 
-            fetch(url)
+            fetchApp(url)
                 .then(function (r) { return r.json(); })
                 .then(function (empleados) {
                     if (!empleados.length) {
@@ -288,7 +293,7 @@
             }
 
             var formData = new FormData(form);
-            fetch("/Citas/Guardar", { method: "POST", body: formData })
+            fetchApp("/Citas/Guardar", { method: "POST", body: formData })
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
                     if (data.success) {
@@ -311,7 +316,7 @@
         formData.append("inicio", nuevoInicioIso);
         formData.append("__RequestVerificationToken", obtenerTokenGlobal());
 
-        fetch(config.reagendarUrl, { method: "POST", body: formData })
+        fetchApp(config.reagendarUrl, { method: "POST", body: formData })
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 if (data.success) {
@@ -367,7 +372,7 @@
                 formData.append("estado", nuevoEstado);
                 formData.append("__RequestVerificationToken", obtenerTokenGlobal());
 
-                fetch(config.cambiarEstadoUrl, { method: "POST", body: formData })
+                fetchApp(config.cambiarEstadoUrl, { method: "POST", body: formData })
                     .then(function (r) { return r.json(); })
                     .then(function (data) {
                         if (data.success) {

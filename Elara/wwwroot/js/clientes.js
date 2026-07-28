@@ -13,7 +13,7 @@
 
     function cargarClientes(term, page) {
         var url = searchUrl + "?term=" + encodeURIComponent(term || "") + "&page=" + (page || 1);
-        fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+        (window.elaraFetch || fetch)(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
             .then(function (response) { return response.text(); })
             .then(function (html) {
                 container.innerHTML = html;

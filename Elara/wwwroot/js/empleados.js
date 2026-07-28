@@ -30,7 +30,7 @@
                 "?desde=" + encodeURIComponent(desde) +
                 "&hasta=" + encodeURIComponent(hasta);
 
-            fetch(url)
+            (window.elaraFetch || fetch)(url)
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
                     resultado.textContent = "Total estimado (" + data.desde + " - " + data.hasta + "): $" + data.total;

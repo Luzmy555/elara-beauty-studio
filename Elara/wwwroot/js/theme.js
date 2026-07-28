@@ -34,7 +34,7 @@
             formData.append("esOscuro", esOscuroNuevo);
             formData.append("__RequestVerificationToken", obtenerToken());
 
-            fetch("/Theme/Establecer", { method: "POST", body: formData }).catch(function () {
+            (window.elaraFetch || fetch)("/Theme/Establecer", { method: "POST", body: formData }).catch(function () {
                 // El tema ya quedó aplicado en esta pantalla aunque falle el
                 // guardado; se reintenta solo si el usuario vuelve a cambiarlo.
             });
