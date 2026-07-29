@@ -30,16 +30,22 @@ It's a server-rendered ASP.NET Core MVC app on purpose: no SPA framework, no bui
     <td width="50%"><img src="docs/screenshots/dashboard.png" alt="Dashboard with KPIs" /><br/><sub align="center">Dashboard</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="docs/screenshots/reportes.png" alt="Revenue and top-services charts" /><br/><sub align="center">Reports — revenue &amp; top services</sub></td>
+    <td width="50%" colspan="2" align="center">
+      <img src="docs/screenshots/reportes-1.png" alt="Reports page — KPIs and date filter" /><br/>
+      <img src="docs/screenshots/reportes-2.png" alt="Reports page — revenue and top-services charts" /><br/>
+      <sub align="center">Reports — KPIs, revenue &amp; top services</sub>
+    </td>
+  </tr>
+  <tr>
     <td width="50%"><img src="docs/screenshots/servicios.png" alt="Service catalog" /><br/><sub align="center">Service catalog</sub></td>
-  </tr>
-  <tr>
     <td width="50%"><img src="docs/screenshots/clientes.png" alt="Client directory" /><br/><sub align="center">Client directory</sub></td>
-    <td width="50%"><img src="docs/screenshots/citas-listado.png" alt="Daily appointment list" /><br/><sub align="center">Appointments — day list</sub></td>
   </tr>
   <tr>
+    <td width="50%"><img src="docs/screenshots/citas-listado.png" alt="Daily appointment list" /><br/><sub align="center">Appointments — day list</sub></td>
     <td width="50%"><img src="docs/screenshots/citas-nueva-cita.png" alt="New appointment form" /><br/><sub align="center">New appointment — live availability</sub></td>
-    <td width="50%"><img src="docs/screenshots/factura-whatsapp.png" alt="Invoice with WhatsApp share" /><br/><sub align="center">Invoice with WhatsApp receipt</sub></td>
+  </tr>
+  <tr>
+    <td width="50%" colspan="2" align="center"><img src="docs/screenshots/factura-whatsapp.png" alt="Invoice with WhatsApp share" width="60%" /><br/><sub align="center">Invoice with WhatsApp receipt</sub></td>
   </tr>
 </table>
 

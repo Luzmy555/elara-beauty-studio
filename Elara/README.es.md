@@ -30,16 +30,22 @@ Es una app ASP.NET Core MVC renderizada del lado del servidor, a propósito: sin
     <td width="50%"><img src="docs/screenshots/dashboard.png" alt="Dashboard con KPIs" /><br/><sub align="center">Dashboard</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="docs/screenshots/reportes.png" alt="Gráficas de ingresos y servicios más solicitados" /><br/><sub align="center">Reportes — ingresos y servicios top</sub></td>
+    <td width="50%" colspan="2" align="center">
+      <img src="docs/screenshots/reportes-1.png" alt="Página de Reportes — KPIs y filtro de fechas" /><br/>
+      <img src="docs/screenshots/reportes-2.png" alt="Página de Reportes — gráficas de ingresos y servicios top" /><br/>
+      <sub align="center">Reportes — KPIs, ingresos y servicios top</sub>
+    </td>
+  </tr>
+  <tr>
     <td width="50%"><img src="docs/screenshots/servicios.png" alt="Catálogo de servicios" /><br/><sub align="center">Catálogo de servicios</sub></td>
-  </tr>
-  <tr>
     <td width="50%"><img src="docs/screenshots/clientes.png" alt="Directorio de clientes" /><br/><sub align="center">Directorio de clientes</sub></td>
-    <td width="50%"><img src="docs/screenshots/citas-listado.png" alt="Listado de citas del día" /><br/><sub align="center">Citas — listado por día</sub></td>
   </tr>
   <tr>
+    <td width="50%"><img src="docs/screenshots/citas-listado.png" alt="Listado de citas del día" /><br/><sub align="center">Citas — listado por día</sub></td>
     <td width="50%"><img src="docs/screenshots/citas-nueva-cita.png" alt="Formulario de nueva cita" /><br/><sub align="center">Nueva cita — disponibilidad en tiempo real</sub></td>
-    <td width="50%"><img src="docs/screenshots/factura-whatsapp.png" alt="Factura con envío por WhatsApp" /><br/><sub align="center">Factura con envío por WhatsApp</sub></td>
+  </tr>
+  <tr>
+    <td width="50%" colspan="2" align="center"><img src="docs/screenshots/factura-whatsapp.png" alt="Factura con envío por WhatsApp" width="60%" /><br/><sub align="center">Factura con envío por WhatsApp</sub></td>
   </tr>
 </table>
 
