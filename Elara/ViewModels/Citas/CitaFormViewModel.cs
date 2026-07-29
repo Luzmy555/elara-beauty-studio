@@ -36,4 +36,5 @@ public class CitaFormViewModel
     public bool EsEdicion { get; set; }
 
     public List<Servicio> ServiciosDisponibles { get; set; } = new();
+    public List<Empleado> EmpleadosDisponibles { get; set; } = new();
 }

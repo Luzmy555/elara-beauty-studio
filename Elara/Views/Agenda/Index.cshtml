@@ -46,11 +46,21 @@ else
 <form id="globalAntiForgeryForm" class="d-none">@Html.AntiForgeryToken()</form>
 
 <div class="card card-elara p-3">
-    <div id="calendario"></div>
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+        <button type="button" class="btn btn-outline-elara btn-sm" id="btnFechaAnterior">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <input type="date" id="fechaSeleccionada" class="form-control form-control-sm" style="max-width: 170px;" />
+        <button type="button" class="btn btn-outline-elara btn-sm" id="btnFechaSiguiente">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+        <button type="button" class="btn btn-outline-elara btn-sm" id="btnFechaHoy">Hoy</button>
+    </div>
+    <div id="listaCitas"></div>
 </div>
 
 <div class="modal fade" id="citaModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title font-heading" id="citaModalTitle">Detalle de la cita</h5>
@@ -64,13 +74,10 @@ else
 <div class="toast-container position-fixed bottom-0 end-0 p-3" id="elaraToasts" style="z-index: 1090;"></div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@@fullcalendar/core@6.1.15/locales/es.global.min.js"></script>
     <script>
-        window.elaraCalendarioConfig = {
+        window.elaraCitasConfig = {
             eventosUrl: '@Url.Action("Eventos", "Agenda")',
             puedeCrear: false,
-            puedeArrastrar: false,
             cambiarEstadoUrl: '@Url.Action("CambiarEstado", "Agenda")'
         };
     </script>

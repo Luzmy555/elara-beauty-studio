@@ -10,5 +10,8 @@ public interface IDisponibilidadService
     // cuente como un conflicto contra sí misma.
     Task<bool> EstaDisponibleAsync(int empleadoId, DateTime inicio, DateTime fin, int? citaIdExcluir = null);
 
-    Task<List<Empleado>> ObtenerEmpleadosDisponiblesAsync(int servicioId, DateTime inicio, int? citaIdExcluir = null);
+    // Enumera las horas de inicio candidatas (cada IntervaloMinutos) dentro del
+    // horario laboral del empleado ese día, filtrando las que ya están ocupadas
+    // o que caen antes de la hora actual si la fecha es hoy.
+    Task<List<TimeSpan>> ObtenerHorariosDisponiblesAsync(int empleadoId, int servicioId, DateTime fecha, int? citaIdExcluir = null);
 }

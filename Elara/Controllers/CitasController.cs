@@ -39,15 +39,15 @@ public class CitasController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> EmpleadosDisponibles(int servicioId, DateTime inicio, int? citaId)
+    public async Task<IActionResult> HorariosDisponibles(int empleadoId, int servicioId, DateTime fecha, int? citaId)
     {
-        if (servicioId <= 0 || inicio == default)
+        if (empleadoId <= 0 || servicioId <= 0 || fecha == default)
         {
             return Json(Array.Empty<object>());
         }
 
-        var empleados = await _disponibilidadService.ObtenerEmpleadosDisponiblesAsync(servicioId, inicio, citaId);
-        return Json(empleados.Select(e => new { id = e.Id, nombreCompleto = e.NombreCompleto }));
+        var horarios = await _disponibilidadService.ObtenerHorariosDisponiblesAsync(empleadoId, servicioId, fecha, citaId);
+        return Json(horarios.Select(h => h.ToString(@"hh\:mm")));
     }
 
     [HttpGet]

@@ -7,20 +7,10 @@ namespace ElaraMVC.Services;
 
 public class CitaService : ICitaService
 {
-    // Colores de marca (fondo, borde) por estado — mismos hex que site.css.
-    private static readonly Dictionary<EstadoCita, (string Bg, string Border)> ColoresPorEstado = new()
-    {
-        [EstadoCita.Pendiente] = ("#E4C688", "#C9A15A"),
-        [EstadoCita.Confirmada] = ("#A8B79A", "#8A9A7C"),
-        [EstadoCita.EnProceso] = ("#C9A15A", "#A8823F"),
-        [EstadoCita.Completada] = ("#2B2620", "#000000"),
-        [EstadoCita.Cancelada] = ("#C77B6C", "#A85F52"),
-        [EstadoCita.NoAsistio] = ("#8A7F73", "#6E6459")
-    };
-
     private readonly ICitaRepository _repository;
     private readonly IClienteRepository _clienteRepository;
     private readonly IServicioRepository _servicioRepository;
+    private readonly IEmpleadoRepository _empleadoRepository;
     private readonly IDisponibilidadService _disponibilidadService;
     private readonly IFacturaRepository _facturaRepository;
 
@@ -28,12 +18,14 @@ public class CitaService : ICitaService
         ICitaRepository repository,
         IClienteRepository clienteRepository,
         IServicioRepository servicioRepository,
+        IEmpleadoRepository empleadoRepository,
         IDisponibilidadService disponibilidadService,
         IFacturaRepository facturaRepository)
     {
         _repository = repository;
         _clienteRepository = clienteRepository;
         _servicioRepository = servicioRepository;
+        _empleadoRepository = empleadoRepository;
         _disponibilidadService = disponibilidadService;
         _facturaRepository = facturaRepository;
     }
@@ -45,26 +37,21 @@ public class CitaService : ICitaService
 
         return citas.Select(c =>
         {
-            var (bg, border) = ColoresPorEstado[c.Estado];
             facturaIdsPorCita.TryGetValue(c.Id, out var facturaId);
 
             return new CitaEventoViewModel
             {
                 Id = c.Id,
-                Title = $"{c.Cliente?.NombreCompleto} · {c.Servicio?.Nombre} ({c.Empleado?.NombreCompleto})",
+                ClienteNombre = c.Cliente?.NombreCompleto ?? string.Empty,
+                ServicioId = c.ServicioId,
+                ServicioNombre = c.Servicio?.Nombre ?? string.Empty,
+                EmpleadoId = c.EmpleadoId,
+                EmpleadoNombre = c.Empleado?.NombreCompleto ?? string.Empty,
                 Start = c.FechaHoraInicio,
                 End = c.FechaHoraFin,
-                BackgroundColor = bg,
-                BorderColor = border,
-                Editable = c.Estado is EstadoCita.Pendiente or EstadoCita.Confirmada,
-                ExtendedProps = new CitaEventoExtendedProps
-                {
-                    Estado = c.Estado.ToString(),
-                    Cliente = c.Cliente?.NombreCompleto ?? string.Empty,
-                    Servicio = c.Servicio?.Nombre ?? string.Empty,
-                    Empleado = c.Empleado?.NombreCompleto ?? string.Empty,
-                    FacturaId = facturaId == 0 ? null : facturaId
-                }
+                Estado = c.Estado.ToString(),
+                PuedeEditar = c.Estado is EstadoCita.Pendiente or EstadoCita.Confirmada,
+                FacturaId = facturaId == 0 ? null : facturaId
             };
         }).ToList();
     }
@@ -76,7 +63,8 @@ public class CitaService : ICitaService
         return new CitaFormViewModel
         {
             FechaHoraInicio = fechaSugerida ?? RedondearProximaHora(DateTime.Now),
-            ServiciosDisponibles = await _servicioRepository.GetAllAsync()
+            ServiciosDisponibles = await _servicioRepository.GetAllAsync(),
+            EmpleadosDisponibles = await ObtenerEmpleadosActivosAsync()
         };
     }
 
@@ -99,8 +87,18 @@ public class CitaService : ICitaService
             Notas = cita.Notas,
             Estado = cita.Estado,
             EsEdicion = true,
-            ServiciosDisponibles = await _servicioRepository.GetAllAsync()
+            ServiciosDisponibles = await _servicioRepository.GetAllAsync(),
+            EmpleadosDisponibles = await ObtenerEmpleadosActivosAsync()
         };
+    }
+
+    private async Task<List<Empleado>> ObtenerEmpleadosActivosAsync()
+    {
+        var empleados = await _empleadoRepository.GetAllAsync();
+        return empleados
+            .Where(e => e.Estado == EstadoEmpleado.Activo)
+            .OrderBy(e => e.NombreCompleto)
+            .ToList();
     }
 
     public async Task<(bool Success, string? Error, int? CitaId)> CrearAsync(CitaFormViewModel model)

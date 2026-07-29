@@ -4,6 +4,7 @@
     @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="EsEdicion" />
+    <input type="hidden" asp-for="FechaHoraInicio" id="FechaHoraInicio" />
 
     <div class="mb-3 position-relative">
         <label class="form-label">Cliente</label>
@@ -13,33 +14,43 @@
         <div id="clienteResultados" class="list-group position-absolute w-100 shadow-sm" style="z-index: 1080; display:none;"></div>
     </div>
 
+    <div class="mb-3">
+        <label asp-for="ServicioId" class="form-label"></label>
+        <select asp-for="ServicioId" id="ServicioId" class="form-select">
+            <option value="">Selecciona un servicio...</option>
+            @foreach (var servicio in Model.ServiciosDisponibles)
+            {
+                <option value="@servicio.Id" data-duracion="@servicio.DuracionMinutos" data-precio="@servicio.Precio.ToString("0.00")">
+                    @servicio.Nombre
+                </option>
+            }
+        </select>
+        <div class="form-text" id="servicioInfo"></div>
+    </div>
+
     <div class="row">
         <div class="col-12 col-md-6 mb-3">
-            <label asp-for="ServicioId" class="form-label"></label>
-            <select asp-for="ServicioId" id="ServicioId" class="form-select">
-                <option value="">Selecciona un servicio...</option>
-                @foreach (var servicio in Model.ServiciosDisponibles)
-                {
-                    <option value="@servicio.Id" data-duracion="@servicio.DuracionMinutos" data-precio="@servicio.Precio.ToString("0.00")">
-                        @servicio.Nombre
-                    </option>
-                }
-            </select>
-            <div class="form-text" id="servicioInfo"></div>
+            <label for="Fecha" class="form-label">Fecha</label>
+            <input type="date" id="Fecha" class="form-control" value="@Model.FechaHoraInicio.ToString("yyyy-MM-dd")" />
         </div>
         <div class="col-12 col-md-6 mb-3">
-            <label asp-for="FechaHoraInicio" class="form-label"></label>
-            <input asp-for="FechaHoraInicio" id="FechaHoraInicio" type="datetime-local" class="form-control" />
+            <label asp-for="EmpleadoId" class="form-label"></label>
+            <select asp-for="EmpleadoId" id="EmpleadoId" class="form-select">
+                <option value="">Selecciona un especialista...</option>
+                @foreach (var empleado in Model.EmpleadosDisponibles)
+                {
+                    <option value="@empleado.Id">@empleado.NombreCompleto</option>
+                }
+            </select>
         </div>
     </div>
 
     <div class="mb-3">
-        <label asp-for="EmpleadoId" class="form-label"></label>
-        <select asp-for="EmpleadoId" id="EmpleadoId" class="form-select" disabled
-                data-actual="@(Model.EsEdicion ? Model.EmpleadoId.ToString() : "")">
-            <option value="">Selecciona servicio y horario primero...</option>
+        <label for="Hora" class="form-label">Hora</label>
+        <select id="Hora" class="form-select" disabled data-hora-actual="@(Model.EsEdicion ? Model.FechaHoraInicio.ToString("HH:mm") : "")">
+            <option value="">Selecciona servicio, fecha y especialista primero...</option>
         </select>
-        <div class="form-text text-elara-muted">Solo se muestran especialistas disponibles en ese horario.</div>
+        <div class="form-text text-elara-muted">Solo se muestran horarios realmente disponibles.</div>
     </div>
 
     @if (Model.EsEdicion)

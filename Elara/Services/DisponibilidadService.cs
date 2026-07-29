@@ -17,6 +17,8 @@ public class DisponibilidadService : IDisponibilidadService
         EstadoCita.Pendiente, EstadoCita.Confirmada, EstadoCita.EnProceso, EstadoCita.Completada
     };
 
+    private const int IntervaloMinutos = 30;
+
     private readonly ApplicationDbContext _context;
 
     public DisponibilidadService(ApplicationDbContext context)
@@ -59,28 +61,47 @@ public class DisponibilidadService : IDisponibilidadService
         return !await query.AnyAsync();
     }
 
-    public async Task<List<Empleado>> ObtenerEmpleadosDisponiblesAsync(int servicioId, DateTime inicio, int? citaIdExcluir = null)
+    public async Task<List<TimeSpan>> ObtenerHorariosDisponiblesAsync(int empleadoId, int servicioId, DateTime fecha, int? citaIdExcluir = null)
     {
+        var empleado = await _context.Empleados
+            .Include(e => e.Horarios)
+            .FirstOrDefaultAsync(e => e.Id == empleadoId);
+
+        if (empleado == null || empleado.Estado != EstadoEmpleado.Activo)
+        {
+            return new List<TimeSpan>();
+        }
+
+        var horario = empleado.Horarios.FirstOrDefault(h => h.DiaSemana == fecha.DayOfWeek);
+        if (horario is not { Trabaja: true, HoraInicio: not null, HoraFin: not null })
+        {
+            return new List<TimeSpan>();
+        }
+
         var servicio = await _context.Servicios.FindAsync(servicioId);
         if (servicio == null)
         {
-            return new List<Empleado>();
+            return new List<TimeSpan>();
         }
 
-        var fin = inicio.AddMinutes(servicio.DuracionMinutos);
+        var duracion = TimeSpan.FromMinutes(servicio.DuracionMinutos);
+        var ultimoInicioPosible = horario.HoraFin.Value - duracion;
+        var horaMinima = fecha.Date == DateTime.Today ? DateTime.Now.TimeOfDay : TimeSpan.Zero;
 
-        var empleados = await _context.Empleados
-            .Include(e => e.Horarios)
-            .Where(e => e.Estado == EstadoEmpleado.Activo)
-            .OrderBy(e => e.NombreCompleto)
-            .ToListAsync();
-
-        var disponibles = new List<Empleado>();
-        foreach (var empleado in empleados)
+        var disponibles = new List<TimeSpan>();
+        for (var candidato = horario.HoraInicio.Value; candidato <= ultimoInicioPosible; candidato += TimeSpan.FromMinutes(IntervaloMinutos))
         {
-            if (await EstaDisponibleAsync(empleado.Id, inicio, fin, citaIdExcluir))
+            if (candidato < horaMinima)
             {
-                disponibles.Add(empleado);
+                continue;
+            }
+
+            var inicio = fecha.Date + candidato;
+            var fin = inicio + duracion;
+
+            if (await EstaDisponibleAsync(empleadoId, inicio, fin, citaIdExcluir))
+            {
+                disponibles.Add(candidato);
             }
         }
 

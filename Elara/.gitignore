@@ -1,0 +1,29 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+*.user
+
+# Visual Studio / VS Code
+.vs/
+.vscode/*
+!.vscode/extensions.json
+
+# Logs
+logs/
+*.log
+
+# User secrets are per-machine (see README setup instructions), never commit them
+**/secrets.json
+
+# Real uploaded content (client photos, payment vouchers, business logo) —
+# keep the folder structure via .gitkeep, but never commit what gets uploaded
+# at runtime; this is a portfolio repo, not a place for real client data.
+wwwroot/uploads/*
+!wwwroot/uploads/**/
+!wwwroot/uploads/**/.gitkeep
+
+# OS files
+.DS_Store
+Thumbs.db

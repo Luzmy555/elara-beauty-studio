@@ -5,12 +5,7 @@
 
     var nombreCliente = Model.Cliente?.NombreCompleto ?? "Cliente sin registrar";
     var telefonoWhatsApp = Model.Cliente?.Telefono ?? Model.ClienteTelefonoContacto;
-    var conceptos = Model.FacturaDetalles.Select(d => d.Servicio?.Nombre ?? d.Producto?.Nombre);
-    var mensajeWhatsApp = $"¡Hola {nombreCliente}! Aquí tu factura de Elara 💅\n" +
-        $"N° {Model.NumeroFactura} | {Model.FechaEmision:dd/MM/yyyy}\n" +
-        $"Detalle: {string.Join(", ", conceptos)}\n" +
-        $"Total: RD$ {Model.Total.ToString("0.00")}\n" +
-        "¡Gracias por tu visita! 💅";
+    var mensajeWhatsApp = WhatsAppLinkHelper.ConstruirMensajeFactura(Model, nombreCliente);
     var whatsappUrl = WhatsAppLinkHelper.ConstruirLink(telefonoWhatsApp, mensajeWhatsApp);
     var todasLasDevoluciones = Model.FacturaDetalles.SelectMany(d => d.Devoluciones).OrderByDescending(d => d.Fecha).ToList();
 }
