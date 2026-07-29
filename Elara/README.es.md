@@ -121,8 +121,8 @@ Es una app ASP.NET Core MVC renderizada del lado del servidor, a propósito: sin
 ### Configuración
 
 ```bash
-git clone https://github.com/Luzmy555/Elara.git
-cd Elara/Elara
+git clone https://github.com/Luzmy555/elara-beauty-studio.git
+cd elara-beauty-studio/Elara
 
 # Configurar la conexión a la base de datos (user-secrets la mantiene fuera del control de versiones)
 dotnet user-secrets init

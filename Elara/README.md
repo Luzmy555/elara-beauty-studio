@@ -121,8 +121,8 @@ It's a server-rendered ASP.NET Core MVC app on purpose: no SPA framework, no bui
 ### Setup
 
 ```bash
-git clone https://github.com/Luzmy555/Elara.git
-cd Elara/Elara
+git clone https://github.com/Luzmy555/elara-beauty-studio.git
+cd elara-beauty-studio/Elara
 
 # Configure the database connection (user-secrets keeps it out of source control)
 dotnet user-secrets init
