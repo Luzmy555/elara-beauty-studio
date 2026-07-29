@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="wwwroot/android-chrome-512x512.png" width="88" alt="Elara logo" />
+  <img src="Elara/wwwroot/android-chrome-512x512.png" width="88" alt="Elara logo" />
 
   # Elara Beauty Studio
 
