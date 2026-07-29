@@ -103,12 +103,22 @@
         calendar.render();
     }
 
+    // El input datetime-local espera la hora LOCAL de quien lo usa.
+    // Date.toISOString() siempre devuelve UTC, así que usarlo aquí adelantaba
+    // (o atrasaba) la hora precargada según el huso horario del navegador —
+    // por eso "Nueva cita" a las 9:20pm mostraba 1:20am del día siguiente.
+    function formatearFechaLocal(fecha) {
+        var pad = function (n) { return n < 10 ? "0" + n : "" + n; };
+        return fecha.getFullYear() + "-" + pad(fecha.getMonth() + 1) + "-" + pad(fecha.getDate()) +
+            "T" + pad(fecha.getHours()) + ":" + pad(fecha.getMinutes());
+    }
+
     var btnNuevaCita = document.getElementById("btnNuevaCita");
     if (btnNuevaCita) {
         btnNuevaCita.addEventListener("click", function () {
             var ahora = new Date();
             ahora.setSeconds(0, 0);
-            abrirFormularioCreacion(ahora.toISOString().slice(0, 16));
+            abrirFormularioCreacion(formatearFechaLocal(ahora));
         });
     }
 
