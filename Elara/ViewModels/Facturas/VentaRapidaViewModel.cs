@@ -6,11 +6,13 @@ namespace ElaraMVC.ViewModels;
 
 public class VentaRapidaLineaViewModel
 {
-    [Required(ErrorMessage = "Selecciona un servicio.")]
-    public int ServicioId { get; set; }
+    // Nullable a propósito: el formulario siempre trae una fila de servicio
+    // vacía por defecto. Si la persona solo quiere vender un producto y la
+    // deja tal cual, se descarta en vez de exigir que la llene (antes esto
+    // fallaba el envío entero con un error de validación poco visible).
+    public int? ServicioId { get; set; }
 
-    [Required(ErrorMessage = "Selecciona quién atendió.")]
-    public int EmpleadoId { get; set; }
+    public int? EmpleadoId { get; set; }
 
     [Range(1, 100, ErrorMessage = "La cantidad debe ser al menos 1.")]
     public int Cantidad { get; set; } = 1;
@@ -83,7 +85,22 @@ public class VentaRapidaViewModel : IValidatableObject
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        var hayServicios = Lineas != null && Lineas.Count > 0;
+        // Una fila de servicio "vacía" (sin servicio elegido) no cuenta como
+        // línea real: es el estado por defecto cuando solo se va a vender un
+        // producto. Solo se valida como error si eligieron servicio pero se
+        // les olvidó el especialista (fila a medio llenar).
+        var lineasServicioReales = (Lineas ?? new List<VentaRapidaLineaViewModel>())
+            .Where(l => l.ServicioId.HasValue)
+            .ToList();
+        var lineaIncompleta = lineasServicioReales.Any(l => !l.EmpleadoId.HasValue);
+        if (lineaIncompleta)
+        {
+            yield return new ValidationResult(
+                "Selecciona quién atendió en cada línea de servicio.",
+                new[] { nameof(Lineas) });
+        }
+
+        var hayServicios = lineasServicioReales.Count > 0;
         var hayProductos = LineasProductos != null && LineasProductos.Count > 0;
 
         if (!hayServicios && !hayProductos)
@@ -102,7 +119,7 @@ public class VentaRapidaViewModel : IValidatableObject
 
         if (MetodoPago == MetodoPago.Efectivo && MontoRecibido.HasValue)
         {
-            var subtotal = (hayServicios ? Lineas!.Sum(l => l.PrecioUnitario * l.Cantidad) : 0m) +
+            var subtotal = lineasServicioReales.Sum(l => l.PrecioUnitario * l.Cantidad) +
                 (hayProductos ? LineasProductos!.Sum(l => l.PrecioUnitario * l.Cantidad) : 0m);
             var total = subtotal - Descuento;
             if (MontoRecibido.Value < total)

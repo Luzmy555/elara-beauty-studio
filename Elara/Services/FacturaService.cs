@@ -168,7 +168,13 @@ public class FacturaService : IFacturaService
 
     public async Task<(bool Success, string? Error, int? FacturaId)> CrearVentaRapidaAsync(VentaRapidaViewModel model)
     {
-        var hayServicios = model.Lineas != null && model.Lineas.Count > 0;
+        // Una fila de servicio sin ServicioId es la fila vacía que trae el
+        // formulario por defecto (venta de solo producto, nunca la tocaron):
+        // se descarta en vez de tratarla como un error.
+        var lineasServicio = (model.Lineas ?? new List<VentaRapidaLineaViewModel>())
+            .Where(l => l.ServicioId.HasValue)
+            .ToList();
+        var hayServicios = lineasServicio.Count > 0;
         var hayProductos = model.LineasProductos != null && model.LineasProductos.Count > 0;
         if (!hayServicios && !hayProductos)
         {
@@ -189,15 +195,20 @@ public class FacturaService : IFacturaService
 
         if (hayServicios)
         {
-            foreach (var linea in model.Lineas!)
+            foreach (var linea in lineasServicio)
             {
-                var servicio = await _servicioRepository.GetByIdAsync(linea.ServicioId);
+                if (!linea.EmpleadoId.HasValue)
+                {
+                    return (false, "Selecciona quién atendió en cada línea de servicio.", null);
+                }
+
+                var servicio = await _servicioRepository.GetByIdAsync(linea.ServicioId!.Value);
                 if (servicio == null)
                 {
                     return (false, "Uno de los servicios seleccionados ya no existe.", null);
                 }
 
-                var empleado = await _empleadoRepository.GetByIdAsync(linea.EmpleadoId);
+                var empleado = await _empleadoRepository.GetByIdAsync(linea.EmpleadoId.Value);
                 if (empleado == null)
                 {
                     return (false, "Uno de los especialistas seleccionados ya no existe.", null);
