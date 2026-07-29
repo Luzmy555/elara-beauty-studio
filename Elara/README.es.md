@@ -31,8 +31,8 @@ Es una app ASP.NET Core MVC renderizada del lado del servidor, a propósito: sin
   </tr>
   <tr>
     <td width="50%" colspan="2" align="center">
-      <img src="docs/screenshots/reportes-1.png" alt="Página de Reportes — KPIs y filtro de fechas" /><br/>
-      <img src="docs/screenshots/reportes-2.png" alt="Página de Reportes — gráficas de ingresos y servicios top" /><br/>
+      <img src="docs/screenshots/reportes-resumen.png" alt="Página de Reportes — KPIs y filtro de fechas" /><br/>
+      <img src="docs/screenshots/reportes-graficas.png" alt="Página de Reportes — gráficas de ingresos y servicios top" /><br/>
       <sub align="center">Reportes — KPIs, ingresos y servicios top</sub>
     </td>
   </tr>

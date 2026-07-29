@@ -31,8 +31,8 @@ It's a server-rendered ASP.NET Core MVC app on purpose: no SPA framework, no bui
   </tr>
   <tr>
     <td width="50%" colspan="2" align="center">
-      <img src="docs/screenshots/reportes-1.png" alt="Reports page — KPIs and date filter" /><br/>
-      <img src="docs/screenshots/reportes-2.png" alt="Reports page — revenue and top-services charts" /><br/>
+      <img src="docs/screenshots/reportes-resumen.png" alt="Reports page — KPIs and date filter" /><br/>
+      <img src="docs/screenshots/reportes-graficas.png" alt="Reports page — revenue and top-services charts" /><br/>
       <sub align="center">Reports — KPIs, revenue &amp; top services</sub>
     </td>
   </tr>
